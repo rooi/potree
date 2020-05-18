@@ -1329,6 +1329,7 @@ export class Viewer extends EventDispatcher{
 			this.renderer.domElement.focus();
 		});
 		//this.renderer.domElement.focus();
+		this.renderer.xr.enabled = true;
 
 		// NOTE: If extension errors occur, pass the string into this.renderer.extensions.get(x) before enabling
 		// enable frag_depth extension for the interpolation shader, if available
@@ -2221,63 +2222,119 @@ export class Viewer extends EventDispatcher{
 		// disappear.
 		if (pose) {
 			
-		  let glLayer = session.renderState.baseLayer;
+			let glLayer = session.renderState.baseLayer;
 
-		  // If we do have a valid pose, bind the WebGL layer's framebuffer,
-		  // which is where any content to be displayed on the XRDevice must be
-		  // rendered.
-		  let gl = this.renderer.getContext('webgl', { xrCompatible: true });
-		  gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+			// If we do have a valid pose, bind the WebGL layer's framebuffer,
+			// which is where any content to be displayed on the XRDevice must be
+			// rendered.
+			let gl = this.renderer.getContext('webgl', { xrCompatible: true });
+			gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
 
-		  // Update the clear color so that we can observe the color in the
-		  // headset changing over time.
-		  gl.clearColor(Math.cos(time / 2000),
+			// Update the clear color so that we can observe the color in the
+			// headset changing over time.
+			gl.clearColor(Math.cos(time / 2000),
 						Math.cos(time / 4000),
 						Math.cos(time / 6000), 1.0);
 
-		  // Clear the framebuffer
-		  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		  		  
-		  // Loop through each of the views reported by the viewer pose.
-		  for (let view of pose.views) {
-			  // Set the viewport required by this view.
-			  let viewport = glLayer.getViewport(view);
-			  gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+			// Clear the framebuffer
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-			  // Render the scene using a fictional rendering library with the view's
-			  // projection matrix and view transform.
+			// Loop through each of the views reported by the viewer pose.
+			for (let view of pose.views) {
+				// Set the viewport required by this view.
+				let viewport = glLayer.getViewport(view);
+				gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+
+				// Render the scene using a fictional rendering library with the view's
+				// projection matrix and view transform.
 			  
-//			  viewer.scene.cameraMode = CameraMode.VR;
-			  //this.scene.getActiveCamera().projectionMatrix = view.projectionMatrix;
-			  //this.scene.getActiveCamera().position.set(view.transform.position);
-			  //this.scene.getActiveCamera().rotation.set(view.transform.orientation);
-			  // Alternatively, the view matrix can be retrieved directly like so:
-			  //this.scene.getActiveCamera().setViewMatrix(view.transform.inverse.matrix);
-			  //this.render(view, viewport);
+//				viewer.scene.cameraMode = CameraMode.VR;
+				//this.scene.getActiveCamera().projectionMatrix = view.projectionMatrix;
+				//this.scene.getActiveCamera().position.set(view.transform.position);
+				//this.scene.getActiveCamera().rotation.set(view.transform.orientation);
+				// Alternatively, the view matrix can be retrieved directly like so:
+				//this.scene.getActiveCamera().setViewMatrix(view.transform.inverse.matrix);
+				//this.render(view, viewport);
+
+				// Draw this view of the scene. What happens in this function really
+				// isn't all that important. What is important is that it renders
+				// into the XRWebGLLayer's framebuffer, using the viewport into that
+				// framebuffer reported by the current view, and using the
+				// projection matrix and view transform from the current view.
+				// We bound the framebuffer and viewport up above, and are passing
+				// in the appropriate matrices here to be used when rendering.
+				//this.scene.draw(view.projectionMatrix, view.transform);
 			  
-			  // Draw this view of the scene. What happens in this function really
-			  // isn't all that important. What is important is that it renders
-			  // into the XRWebGLLayer's framebuffer, using the viewport into that
-			  // framebuffer reported by the current view, and using the
-			  // projection matrix and view transform from the current view.
-			  // We bound the framebuffer and viewport up above, and are passing
-			  // in the appropriate matrices here to be used when rendering.
-			  //this.scene.draw(view.projectionMatrix, view.transform);
-			  
-			  let pRenderer = null;
-			  
-			  if (this.hqRenderer) pRenderer = this.hqRenderer;
-			  else{
-				if (this.edlRenderer) pRenderer = this.edlRenderer;
-				else {
-					if (this.potreeRenderer) pRenderer = this.potreeRenderer;
+				let pRenderer = null;
+
+				if(this.useHQ){
+					if (!this.hqRenderer) {
+						this.hqRenderer = new HQSplatRenderer(this);
+					}
+					this.hqRenderer.useEDL = this.useEDL;
+					//this.hqRenderer.render(this.renderer);
+
+					pRenderer = this.hqRenderer;
+				}else{
+					if (this.useEDL && Features.SHADER_EDL.isSupported()) {
+						if (!this.edlRenderer) {
+							this.edlRenderer = new EDLRenderer(this);
+						}
+						//this.edlRenderer.render(this.renderer);
+						pRenderer = this.edlRenderer;
+					} else {
+						if (!this.potreeRenderer) {
+							this.potreeRenderer = new PotreeRenderer(this);
+						}
+						//this.potreeRenderer.render();
+						pRenderer = this.potreeRenderer;
+					}
 				}
-			  }
-			  
-			  pRenderer.clear();
-			  pRenderer.render(this.renderer);
+			  /*
+				{ // resize
+					const width = this.scaleFactor * this.renderArea.clientWidth;
+					const height = this.scaleFactor * this.renderArea.clientHeight;
 
-		  }
+					this.renderer.setSize(width, height);
+					const pixelRatio = this.renderer.getPixelRatio();
+					const aspect = width / height;
+
+					const scene = this.scene;
+
+					scene.cameraP.aspect = aspect;
+					scene.cameraP.updateProjectionMatrix();
+
+					let frustumScale = this.scene.view.radius;
+					scene.cameraO.left = -frustumScale;
+					scene.cameraO.right = frustumScale;
+					scene.cameraO.top = frustumScale * 1 / aspect;
+					scene.cameraO.bottom = -frustumScale * 1 / aspect;
+					scene.cameraO.updateProjectionMatrix();
+
+					scene.cameraScreenSpace.top = 1/aspect;
+					scene.cameraScreenSpace.bottom = -1/aspect;
+					scene.cameraScreenSpace.updateProjectionMatrix();
+				}
+			  */
+					
+				this.vr.node.updateMatrixWorld();
+			    //viewer.scene.cameraMode = CameraMode.VR;
+								
+				this.scene.getActiveCamera().projectionMatrix.set(view.projectionMatrix);
+				this.scene.cameraP.updateProjectionMatrix();
+				//this.scene.getActiveCamera().position.set(view.transform.position);
+				//this.scene.getActiveCamera().rotation.set(view.transform.orientation);
+				//this.scene.cameraP.modelViewMatrix.set(view.transform.inverse.matrix);
+			 
+				//const viewport = [0, 0, width / 2, height];
+
+				//this.renderer.setViewport(viewport);
+				//pRenderer.render({camera: this.scene.getActiveCamera(), viewport: viewport});
+			 
+				pRenderer.clear();
+				pRenderer.render(this.renderer);//, this.scene.getActiveCamera());
+
+			}
 		}
 	}
 
@@ -2294,19 +2351,27 @@ export class Viewer extends EventDispatcher{
 
 
 		const vrActive = (this.vr && this.xrSession);//this.vr.display.isPresenting);
-/*
+
 		if(vrActive){
-			const {display, frameData} = this.vr;
+			//const {display, frameData} = this.vr;
 
-			display.requestAnimationFrame(this.loop.bind(this));
+			//display.requestAnimationFrame(this.loop.bind(this));
 
-			display.getFrameData(frameData);
+			//display.getFrameData(frameData);
 
+			//this.update(this.clock.getDelta(), timestamp);
+
+			//this.render();
+
+			//this.vr.display.submitFrame();
+			
+			
+			this.renderer.setAnimationLoop(this.loop.bind(this)); // replace requestAnimationFrame
+			
 			this.update(this.clock.getDelta(), timestamp);
-
-			this.render();
-
-			this.vr.display.submitFrame();
+			
+			//this.render();
+			
 		}else{
 			requestAnimationFrame(this.loop.bind(this));
 
@@ -2314,12 +2379,7 @@ export class Viewer extends EventDispatcher{
 
 			this.render();
 		}
-*/		
-		requestAnimationFrame(this.loop.bind(this));
 
-		this.update(this.clock.getDelta(), timestamp);
-
-		this.render();
 		if(Potree.measureTimings){
 			performance.mark("loop-end");
 			performance.measure("loop", "loop-start", "loop-end");
