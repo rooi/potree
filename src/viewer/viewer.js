@@ -1726,7 +1726,6 @@ export class Viewer extends EventDispatcher{
 		{
 			if(this._previousCamera === undefined){
 				this._previousCamera = this.scene.getActiveCamera().clone();
-				this._previousCamera.rotation.copy(this.scene.getActiveCamera());
 			}
 
 			if(!this._previousCamera.matrixWorld.equals(camera.matrixWorld)){
@@ -1744,7 +1743,6 @@ export class Viewer extends EventDispatcher{
 			}
 
 			this._previousCamera = this.scene.getActiveCamera().clone();
-			this._previousCamera.rotation.copy(this.scene.getActiveCamera());
 
 		}
 
