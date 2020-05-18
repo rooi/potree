@@ -189,7 +189,7 @@ class ProfileFakeOctree extends PointCloudTree{
 				range: [0, 1],
 			};
 
-			geometry.addAttribute(attributeName, bufferAttribute);
+			geometry.setAttribute(attributeName, bufferAttribute);
 		}
 
 		geometry.drawRange.start = 0;

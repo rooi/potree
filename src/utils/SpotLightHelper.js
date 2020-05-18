@@ -37,7 +37,7 @@ export class SpotLightHelper extends THREE.Object3D{
 			]);
 
 			let geometry = new THREE.BufferGeometry();
-			geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+			geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
 			let material = new THREE.LineBasicMaterial();
 

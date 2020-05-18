@@ -43,13 +43,13 @@ export class NodeLoader{
 					let buffer = buffers[property].buffer;
 
 					if(property === "POSITION_CARTESIAN"){
-						geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}else if(property === "RGBA"){
-						geometry.addAttribute('rgba', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+						geometry.setAttribute('rgba', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
 					}else if (property === "INDICES") {
 						let bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
 						bufferAttribute.normalized = true;
-						geometry.addAttribute('indices', bufferAttribute);
+						geometry.setAttribute('indices', bufferAttribute);
 					} 
 
 				}
