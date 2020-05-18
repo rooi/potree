@@ -122,29 +122,32 @@
 	// create VR button if VR display is available
 	async function createVRButton(){
 
-		if(typeof navigator.getVRDisplays === "undefined"){
-			return;
-		}
-
-		const displays = await navigator.getVRDisplays();
-		console.log(displays);
-
-		if(displays.length > 0){
-
-			const controls = new Potree.VRControlls(viewer);
-			viewer.addEventListener("update", (e) => controls.update(e.delta));
+		// Is WebXR available on this UA?
+        if (navigator.xr) {
+          // If the device allows creation of exclusive sessions set it as the
+          // target of the 'Enter XR' button.
+          navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+            if (supported) {
+              // Updates the button to start an XR session when clicked.
+              //xrButton.addEventListener('click', onButtonClicked);
+              //xrButton.textContent = 'Enter VR';
+              //xrButton.disabled = false;
+			  const controls = new Potree.VRControlls(viewer);
+			  viewer.addEventListener("update", (e) => controls.update(e.delta));
 
 		
-			const elVR = document.createElement("div");
-			elVR.innerHTML = `
+			  const elVR = document.createElement("div");
+			  elVR.innerHTML = `
 				<div style="position: absolute; z-index: 10000; right: 10px; bottom: 10px;" 
 					onclick="viewer.toggleVR()">
 					<img src="../build/potree/resources/icons/vr_button.svg" />
 				</div>
-			`;
+			` ;
 
-			document.body.appendChild(elVR);
-		}
+			  document.body.appendChild(elVR);
+            }
+          });
+        }
 	}
 	createVRButton();
 	

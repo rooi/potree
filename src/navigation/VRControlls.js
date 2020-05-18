@@ -198,7 +198,7 @@ export class VRControlls{
 		const toScene = this.toScene.bind(this);
 		const vr = viewer.vr;
 
-		const vrActive = vr && vr.display.isPresenting;
+		const vrActive = vr;// && vr.display.isPresenting;
 
 		snLeft.node.visible = vrActive;
 		snRight.node.visible = vrActive;
@@ -465,9 +465,9 @@ export class VRControlls{
 			};
 
 			let flip = 1;
-			if(display.displayName.includes("Oculus")){
-				flip = -1;
-			}
+			//if(display.displayName.includes("Oculus")){
+			//	flip = -1;
+			//}
 
 			let move = null;
 

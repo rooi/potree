@@ -44,6 +44,10 @@ export class Viewer extends EventDispatcher{
 		this.vr = null;
 		this.onVrListeners = [];
 
+		//let xrButton = document.getElementById('xr-button');
+		this.xrSession = null;
+		this.xrRefSpace = null;
+
 		this.messages = [];
 		this.elMessages = $(`
 		<div id="message_listing" 
@@ -1293,6 +1297,7 @@ export class Viewer extends EventDispatcher{
 			//premultipliedAlpha: _premultipliedAlpha,
 			preserveDrawingBuffer: true,
 			powerPreference: "high-performance",
+			xrCompatible: true
 		};
 
 		// let contextAttributes = {
@@ -1359,13 +1364,15 @@ export class Viewer extends EventDispatcher{
 
 	async prepareVR(){
 
-		if(!navigator.getVRDisplays){
+		// Is WebXR available on this UA?
+		if (!navigator.xr) {
 			console.info("browser does not support WebVR");
 
 			return false;
 		}
 
 		try{
+/*
 			let frameData = new VRFrameData();
 			let displays = await navigator.getVRDisplays();
 
@@ -1377,16 +1384,16 @@ export class Viewer extends EventDispatcher{
 			let display = displays[displays.length - 1];
 			display.depthNear = 0.1;
 			display.depthFar = 10000.0;
-
-			if(!display.capabilities.canPresent){
+*/
+			if(!navigator.xr.isSessionSupported('immersive-vr')){
 				// Not sure why canPresent would ever be false?
 				console.error("VR display canPresent === false");
 				return false;
 			}
 
 			this.vr = {
-				frameData: frameData,
-				display: display,
+				//frameData: frameData,
+				//display: display,
 				node: new THREE.Object3D(),
 			};
 
@@ -1846,10 +1853,10 @@ export class Viewer extends EventDispatcher{
 			}
 			
 			const vr = this.vr;
-			const vrActive = (vr && vr.display.isPresenting);
+			const vrActive = (vr && this.xrSession);//vr.display.isPresenting);
 
 			if(vrActive){
-
+/*
 				const {display, frameData} = vr;
 
 				const leftEye = display.getEyeParameters("left");
@@ -1967,7 +1974,7 @@ export class Viewer extends EventDispatcher{
 
 					camera.fov = leftEye.fieldOfView.upDegrees;
 				}
-
+*/
 			}else{
 
 				{ // resize
@@ -2112,7 +2119,7 @@ export class Viewer extends EventDispatcher{
 	}
 
 	async toggleVR(){
-		const vrActive = (this.vr && this.vr.display.isPresenting);
+		const vrActive = (this.vr && this.xrSession);//this.vr.display.isPresenting);
 
 		if(vrActive){
 			this.stopVR();
@@ -2131,7 +2138,12 @@ export class Viewer extends EventDispatcher{
 		let display = this.vr.display;
 
 		try{
-			await display.requestPresent([{ source: canvas }]);
+			//await display.requestPresent([{ source: canvas }]);
+			if (!this.xrSession) {
+				navigator.xr.requestSession('immersive-vr').then(this.onSessionStarted.bind(this));
+			} else {
+				this.xrSession.end();
+			}
 		}catch(e){
 			console.error(e);
 			this.postError("requestPresent failed");
@@ -2147,6 +2159,127 @@ export class Viewer extends EventDispatcher{
 	async stopVR(){
 		// TODO shutdown VR
 	}
+	
+	// Called when we've successfully acquired a XRSession. In response we
+	// will set up the necessary session state and kick off the frame loop.
+	async onSessionStarted(session) {
+		this.xrSession = session;
+		//xrButton.textContent = 'Exit VR';
+
+		// Listen for the sessions 'end' event so we can respond if the user
+		// or UA ends the session for any reason.
+		session.addEventListener('end', this.onSessionEnded.bind(this));
+
+		// Create a WebGL context to render with, initialized to be compatible
+		// with the XRDisplay we're presenting to.
+		//let canvas = document.createElement('canvas');
+		let gl = this.renderer.getContext('webgl', { xrCompatible: true });//canvas.getContext('webgl', { xrCompatible: true });
+
+		// Use the new WebGL context to create a XRWebGLLayer and set it as the
+		// sessions baseLayer. This allows any content rendered to the layer to
+		// be displayed on the XRDevice.
+		session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+
+		// Get a reference space, which is required for querying poses. In this
+		// case an 'local' reference space means that all poses will be relative
+		// to the location where the XRDevice was first detected.
+		session.requestReferenceSpace('local').then((refSpace) => {
+		  this.xrRefSpace = refSpace;
+
+		  // Inform the session that we're ready to begin drawing.
+		  session.requestAnimationFrame(this.onXRFrame.bind(this));
+		});
+	}
+
+	// Called either when the user has explicitly ended the session by calling
+	// session.end() or when the UA has ended the session for any reason.
+	// At this point the session object is no longer usable and should be
+	// discarded.
+	async onSessionEnded(event) {
+		this.xrSession = null;
+		//xrButton.textContent = 'Enter VR';
+
+		// In this simple case discard the WebGL context too, since we're not
+		// rendering anything else to the screen with it.
+	}
+	
+	// Called every time the XRSession requests that a new frame be drawn.
+	async onXRFrame(time, frame) {
+		let session = frame.session;
+
+		// Inform the session that we're ready for the next frame.
+		session.requestAnimationFrame(this.onXRFrame.bind(this));
+
+		// Get the XRDevice pose relative to the reference space we created
+		// earlier.
+		let pose = frame.getViewerPose(this.xrRefSpace);
+
+		// Getting the pose may fail if, for example, tracking is lost. So we
+		// have to check to make sure that we got a valid pose before attempting
+		// to render with it. If not in this case we'll just leave the
+		// framebuffer cleared, so tracking loss means the scene will simply
+		// disappear.
+		if (pose) {
+			
+		  let glLayer = session.renderState.baseLayer;
+
+		  // If we do have a valid pose, bind the WebGL layer's framebuffer,
+		  // which is where any content to be displayed on the XRDevice must be
+		  // rendered.
+		  let gl = this.renderer.getContext('webgl', { xrCompatible: true });
+		  gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+
+		  // Update the clear color so that we can observe the color in the
+		  // headset changing over time.
+		  gl.clearColor(Math.cos(time / 2000),
+						Math.cos(time / 4000),
+						Math.cos(time / 6000), 1.0);
+
+		  // Clear the framebuffer
+		  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		  		  
+		  // Loop through each of the views reported by the viewer pose.
+		  for (let view of pose.views) {
+			  // Set the viewport required by this view.
+			  let viewport = glLayer.getViewport(view);
+			  gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height);
+
+			  // Render the scene using a fictional rendering library with the view's
+			  // projection matrix and view transform.
+			  
+//			  viewer.scene.cameraMode = CameraMode.VR;
+			  //this.scene.getActiveCamera().projectionMatrix = view.projectionMatrix;
+			  //this.scene.getActiveCamera().position.set(view.transform.position);
+			  //this.scene.getActiveCamera().rotation.set(view.transform.orientation);
+			  // Alternatively, the view matrix can be retrieved directly like so:
+			  //this.scene.getActiveCamera().setViewMatrix(view.transform.inverse.matrix);
+			  //this.render(view, viewport);
+			  
+			  // Draw this view of the scene. What happens in this function really
+			  // isn't all that important. What is important is that it renders
+			  // into the XRWebGLLayer's framebuffer, using the viewport into that
+			  // framebuffer reported by the current view, and using the
+			  // projection matrix and view transform from the current view.
+			  // We bound the framebuffer and viewport up above, and are passing
+			  // in the appropriate matrices here to be used when rendering.
+			  //this.scene.draw(view.projectionMatrix, view.transform);
+			  
+			  let pRenderer = null;
+			  
+			  if (this.hqRenderer) pRenderer = this.hqRenderer;
+			  else{
+				if (this.edlRenderer) pRenderer = this.edlRenderer;
+				else {
+					if (this.potreeRenderer) pRenderer = this.potreeRenderer;
+				}
+			  }
+			  
+			  pRenderer.clear();
+			  pRenderer.render(this.renderer);
+
+		  }
+		}
+	}
 
 	loop(timestamp){
 
@@ -2160,8 +2293,8 @@ export class Viewer extends EventDispatcher{
 		}
 
 
-		const vrActive = (this.vr && this.vr.display.isPresenting);
-
+		const vrActive = (this.vr && this.xrSession);//this.vr.display.isPresenting);
+/*
 		if(vrActive){
 			const {display, frameData} = this.vr;
 
@@ -2181,8 +2314,12 @@ export class Viewer extends EventDispatcher{
 
 			this.render();
 		}
+*/		
+		requestAnimationFrame(this.loop.bind(this));
 
+		this.update(this.clock.getDelta(), timestamp);
 
+		this.render();
 		if(Potree.measureTimings){
 			performance.mark("loop-end");
 			performance.measure("loop", "loop-start", "loop-end");
