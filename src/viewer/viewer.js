@@ -1328,6 +1328,7 @@ export class Viewer extends EventDispatcher{
 		this.renderer.domElement.addEventListener('mousedown', () => {
 			this.renderer.domElement.focus();
 		});
+
 		//this.renderer.domElement.focus();
 		this.renderer.xr.enabled = true;
 
@@ -1856,128 +1857,7 @@ export class Viewer extends EventDispatcher{
 			const vr = this.vr;
 			const vrActive = (vr && this.xrSession);//vr.display.isPresenting);
 
-			if(vrActive){
-/*
-				const {display, frameData} = vr;
-
-				const leftEye = display.getEyeParameters("left");
-				const rightEye = display.getEyeParameters("right");
-
-				let width = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
-				let height = Math.max(leftEye.renderHeight, rightEye.renderHeight);
-
-				// width *= 0.5;
-				// height *= 0.5;
-
-				this.renderer.setSize(width, height);
-
-				pRenderer.clear();
-
-				//const camera = new THREE.Camera();
-				viewer.scene.cameraMode = CameraMode.VR;
-				const camera = viewer.scene.getActiveCamera();
-				{
-					camera.near = display.depthNear;
-					camera.far = display.depthFar;
-					camera.projectionMatrix = new THREE.Matrix4();
-					camera.matrixWorldInverse = new THREE.Matrix4();
-					camera.matrixWorld = new THREE.Matrix4();
-					camera.updateProjectionMatrix =  () => {};
-					camera.updateMatrixWorld = () => {};
-					camera.fov = 60;
-				};
-
-				const flipWorld = new THREE.Matrix4().fromArray([
-					1, 0, 0, 0, 
-					0, 0, 1, 0, 
-					0, -1, 0, 0,
-					0, 0, 0, 1
-				]);
-				const flipView = new THREE.Matrix4().getInverse(flipWorld);
-
-				vr.node.updateMatrixWorld();
-
-				{// LEFT
-					camera.projectionMatrix.fromArray(frameData.leftProjectionMatrix);
-
-					const leftView = new THREE.Matrix4().fromArray(frameData.leftViewMatrix);
-					const view = new THREE.Matrix4().multiplyMatrices(leftView, flipView);
-					const world = new THREE.Matrix4().getInverse(view);
-
-					{
-						const tmp = new THREE.Matrix4().multiplyMatrices(vr.node.matrixWorld, world);
-						world.copy(tmp);
-						view.getInverse(world);
-					}
-
-					camera.matrixWorldInverse.copy(view);
-					camera.matrixWorld.copy(world);
-
-					const viewport = [0, 0, width / 2, height];
-
-					this.renderer.setViewport(...viewport);
-					pRenderer.render({camera: camera, viewport: viewport});
-					//this.renderer.render(this.overlay, this.overlayCamera);
-				}
-
-				{// RIGHT
-				
-					camera.projectionMatrix.fromArray(frameData.rightProjectionMatrix);
-
-					const rightView = new THREE.Matrix4().fromArray(frameData.rightViewMatrix);
-					const view = new THREE.Matrix4().multiplyMatrices(rightView, flipView);
-					const world = new THREE.Matrix4().getInverse(view);
-
-					{
-						const tmp = new THREE.Matrix4().multiplyMatrices(vr.node.matrixWorld, world);
-						world.copy(tmp);
-						view.getInverse(world);
-					}
-
-					camera.matrixWorldInverse.copy(view);
-					camera.matrixWorld.copy(world);
-
-					const viewport = [width / 2, 0, width / 2, height];
-
-					this.renderer.setViewport(...viewport);
-					pRenderer.clearTargets();
-					pRenderer.render({camera: camera, viewport: viewport, debug: 2});
-					//this.renderer.render(this.overlay, this.overlayCamera);
-				}
-
-				{ // CENTER
-
-					{ // central view matrix
-						// TODO this can't be right...can it?
-
-						const left = frameData.leftViewMatrix;
-						const right = frameData.rightViewMatrix
-
-						const centerView = new THREE.Matrix4();
-
-						for(let i = 0; i < centerView.elements.length; i++){
-							centerView.elements[i] = (left[i] + right[i]) / 2;
-						}
-
-						const view = new THREE.Matrix4().multiplyMatrices(centerView, flipView);
-						const world = new THREE.Matrix4().getInverse(view);
-
-						{
-							const tmp = new THREE.Matrix4().multiplyMatrices(vr.node.matrixWorld, world);
-							world.copy(tmp);
-							view.getInverse(world);
-						}
-
-						camera.matrixWorldInverse.copy(view);
-						camera.matrixWorld.copy(world);
-					}
-
-
-					camera.fov = leftEye.fieldOfView.upDegrees;
-				}
-*/
-			}else{
-
+			if(!vrActive){
 				{ // resize
 					const width = this.scaleFactor * this.renderArea.clientWidth;
 					const height = this.scaleFactor * this.renderArea.clientHeight;
@@ -2247,24 +2127,7 @@ export class Viewer extends EventDispatcher{
 
 				// Render the scene using a fictional rendering library with the view's
 				// projection matrix and view transform.
-			  
-//				viewer.scene.cameraMode = CameraMode.VR;
-				//this.scene.getActiveCamera().projectionMatrix = view.projectionMatrix;
-				//this.scene.getActiveCamera().position.set(view.transform.position);
-				//this.scene.getActiveCamera().rotation.set(view.transform.orientation);
-				// Alternatively, the view matrix can be retrieved directly like so:
-				//this.scene.getActiveCamera().setViewMatrix(view.transform.inverse.matrix);
-				//this.render(view, viewport);
-
-				// Draw this view of the scene. What happens in this function really
-				// isn't all that important. What is important is that it renders
-				// into the XRWebGLLayer's framebuffer, using the viewport into that
-				// framebuffer reported by the current view, and using the
-				// projection matrix and view transform from the current view.
-				// We bound the framebuffer and viewport up above, and are passing
-				// in the appropriate matrices here to be used when rendering.
-				//this.scene.draw(view.projectionMatrix, view.transform);
-			  
+			  			  
 				let pRenderer = null;
 
 				if(this.useHQ){
@@ -2290,50 +2153,24 @@ export class Viewer extends EventDispatcher{
 						pRenderer = this.potreeRenderer;
 					}
 				}
-			  /*
-				{ // resize
-					const width = this.scaleFactor * this.renderArea.clientWidth;
-					const height = this.scaleFactor * this.renderArea.clientHeight;
 
-					this.renderer.setSize(width, height);
-					const pixelRatio = this.renderer.getPixelRatio();
-					const aspect = width / height;
+			  
+					// Set the left or right eye half.
+					this.renderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
 
-					const scene = this.scene;
+					let viewMatrix = new THREE.Matrix4();
+					viewMatrix.fromArray(view.transform.matrix);
 
-					scene.cameraP.aspect = aspect;
-					scene.cameraP.updateProjectionMatrix();
+					// Update the scene and camera matrices.
+					this.scene.getActiveCamera().projectionMatrix.fromArray(view.projectionMatrix);
+					this.scene.getActiveCamera().matrixWorldInverse.copy(viewMatrix);
+					//this.scene.matrix.copy(view.transform.matrix);
 
-					let frustumScale = this.scene.view.radius;
-					scene.cameraO.left = -frustumScale;
-					scene.cameraO.right = frustumScale;
-					scene.cameraO.top = frustumScale * 1 / aspect;
-					scene.cameraO.bottom = -frustumScale * 1 / aspect;
-					scene.cameraO.updateProjectionMatrix();
-
-					scene.cameraScreenSpace.top = 1/aspect;
-					scene.cameraScreenSpace.bottom = -1/aspect;
-					scene.cameraScreenSpace.updateProjectionMatrix();
-				}
-			  */
-					
-				this.vr.node.updateMatrixWorld();
-			    //viewer.scene.cameraMode = CameraMode.VR;
-								
-				this.scene.getActiveCamera().projectionMatrix.set(view.projectionMatrix);
-				this.scene.cameraP.updateProjectionMatrix();
-				//this.scene.getActiveCamera().position.set(view.transform.position);
-				//this.scene.getActiveCamera().rotation.set(view.transform.orientation);
-				//this.scene.cameraP.modelViewMatrix.set(view.transform.inverse.matrix);
-			 
-				//const viewport = [0, 0, width / 2, height];
-
-				//this.renderer.setViewport(viewport);
-				//pRenderer.render({camera: this.scene.getActiveCamera(), viewport: viewport});
-			 
-				pRenderer.clear();
-				pRenderer.render(this.renderer);//, this.scene.getActiveCamera());
-
+					// Tell the scene to update (otherwise it will ignore the change of matrix).
+					//this.scene.updateMatrixWorld(true);
+					pRenderer.render(this.renderer);//this.scene, this.camera);
+					// Ensure that left eye calcs aren't going to interfere.
+					this.renderer.clearDepth();
 			}
 		}
 	}
@@ -2376,7 +2213,7 @@ export class Viewer extends EventDispatcher{
 			requestAnimationFrame(this.loop.bind(this));
 
 			this.update(this.clock.getDelta(), timestamp);
-
+				
 			this.render();
 		}
 
