@@ -43,6 +43,8 @@ export class Viewer extends EventDispatcher{
 
 		this.vr = null;
 		this.onVrListeners = [];
+		this.xrSessionStartPosition = null;
+		this.xrSessionStartDirection = null;
 
 		//let xrButton = document.getElementById('xr-button');
 		this.xrSession = null;
@@ -2070,6 +2072,9 @@ export class Viewer extends EventDispatcher{
 		  // Inform the session that we're ready to begin drawing.
 		  session.requestAnimationFrame(this.onXRFrame.bind(this));
 		});
+		
+		this.xrSessionStartPosition = this.scene.view.position.clone();
+		this.xrSessionStartDirection = this.scene.view.direction.clone();
 	}
 
 	// Called either when the user has explicitly ended the session by calling
@@ -2109,16 +2114,16 @@ export class Viewer extends EventDispatcher{
 			// rendered.
 			let gl = this.renderer.getContext('webgl', { xrCompatible: true });
 			gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
-
-			// Update the clear color so that we can observe the color in the
-			// headset changing over time.
-			gl.clearColor(Math.cos(time / 2000),
-						Math.cos(time / 4000),
-						Math.cos(time / 6000), 1.0);
-
-			// Clear the framebuffer
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+			
+			// Adjust position and rotation to head movements
+			let pos = this.xrSessionStartPosition.clone();
+			pos.add(new THREE.Vector3(pose.transform.position.x, -pose.transform.position.z, pose.transform.position.y));
+			this.scene.view.position.copy(pos);
+			
+			let rot  = new THREE.Quaternion(pose.transform.orientation.x, pose.transform.orientation.y, pose.transform.orientation.z, const d = new THREE.Vector3(0, 0, -1);
+			d.applyQuaternion(rot);
+			this.scene.view.direction = d;
+			
 			// Loop through each of the views reported by the viewer pose.
 			for (let view of pose.views) {
 				// Set the viewport required by this view.
