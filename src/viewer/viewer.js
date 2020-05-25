@@ -2120,7 +2120,8 @@ export class Viewer extends EventDispatcher{
 			pos.add(new THREE.Vector3(pose.transform.position.x, -pose.transform.position.z, pose.transform.position.y));
 			this.scene.view.position.copy(pos);
 			
-			let rot  = new THREE.Quaternion(pose.transform.orientation.x, pose.transform.orientation.y, pose.transform.orientation.z, const d = new THREE.Vector3(0, 0, -1);
+			let rot  = new THREE.Quaternion(pose.transform.orientation.x, pose.transform.orientation.y, pose.transform.orientation.z, pose.transform.orientation.w);
+			const d = new THREE.Vector3(0, 0, -1);
 			d.applyQuaternion(rot);
 			this.scene.view.direction = d;
 			
