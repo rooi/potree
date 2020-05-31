@@ -1389,10 +1389,11 @@ export class Viewer extends EventDispatcher{
 			display.depthNear = 0.1;
 			display.depthFar = 10000.0;
 */
-			if(!navigator.xr.isSessionSupported('immersive-vr')){
+			if(!navigator.xr.isSessionSupported('immersive-ar') && !navigator.xr.isSessionSupported('immersive-vr')){
 				// Not sure why canPresent would ever be false?
 				console.error("VR display canPresent === false");
 				return false;
+
 			}
 
 			this.vr = {
@@ -2023,7 +2024,7 @@ export class Viewer extends EventDispatcher{
 		try{
 			//await display.requestPresent([{ source: canvas }]);
 			if (!this.xrSession) {
-				navigator.xr.requestSession('immersive-vr').then(this.onSessionStarted.bind(this));
+				navigator.xr.requestSession('immersive-ar').then(this.onSessionStarted.bind(this));
 			} else {
 				this.xrSession.end();
 			}
@@ -2065,8 +2066,8 @@ export class Viewer extends EventDispatcher{
 
 		// Get a reference space, which is required for querying poses. In this
 		// case an 'local' reference space means that all poses will be relative
-		// to the location where the XRDevice was first detected.
-		session.requestReferenceSpace('local').then((refSpace) => {
+		// to the location where the XRDevice was first detected.  
+	    session.requestReferenceSpace('local').then((refSpace) => {
 		  this.xrRefSpace = refSpace;
 
 		  // Inform the session that we're ready to begin drawing.
@@ -2092,13 +2093,13 @@ export class Viewer extends EventDispatcher{
 	// Called every time the XRSession requests that a new frame be drawn.
 	async onXRFrame(time, frame) {
 		let session = frame.session;
-
+		
 		// Inform the session that we're ready for the next frame.
 		session.requestAnimationFrame(this.onXRFrame.bind(this));
 
 		// Get the XRDevice pose relative to the reference space we created
 		// earlier.
-		let pose = frame.getViewerPose(this.xrRefSpace);
+		let pose = frame.getViewerPose(this.xrRefSpace);//refSpace);
 
 		// Getting the pose may fail if, for example, tracking is lost. So we
 		// have to check to make sure that we got a valid pose before attempting
@@ -2121,9 +2122,13 @@ export class Viewer extends EventDispatcher{
 			this.scene.view.position.copy(pos);
 			
 			let rot  = new THREE.Quaternion(pose.transform.orientation.x, pose.transform.orientation.y, pose.transform.orientation.z, pose.transform.orientation.w);
-			const d = new THREE.Vector3(0, 0, -1);
-			d.applyQuaternion(rot);
-			this.scene.view.direction = d;
+			var euler = new THREE.Euler();
+			euler.setFromQuaternion(rot,"XYZ");
+			//const d = new THREE.Vector3(0, 0, -1);
+			//d.applyQuaternion(rot);
+			//this.scene.view.direction = d;
+			this.scene.view.pitch = -euler.x;
+			this.scene.view.yaw = -euler.y;
 			
 			// Loop through each of the views reported by the viewer pose.
 			for (let view of pose.views) {

@@ -67,13 +67,20 @@ export class OctreeGeometryNode{
 		return this.boundingBox;
 	}
 
-	load(){
+	loadPoints(){
+		this.octreeGeometry.loader.load(this);
+	}
 
-		if (Potree.numNodesLoading >= Potree.maxNodesLoading) {
+	load(){
+		if (this.loading === true || this.loaded === true || Potree.numNodesLoading >= Potree.maxNodesLoading) {
 			return;
 		}
 
-		this.octreeGeometry.loader.load(this);
+		this.loading = true;
+
+		Potree.numNodesLoading++;
+
+		this.loadPoints();
 	}
 
 	getNumPoints(){
