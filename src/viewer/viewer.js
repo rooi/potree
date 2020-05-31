@@ -2116,11 +2116,6 @@ export class Viewer extends EventDispatcher{
 			let gl = this.renderer.getContext('webgl', { xrCompatible: true });
 			gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
 			
-			// Adjust position and rotation to head movements
-			let pos = this.xrSessionStartPosition.clone();
-			pos.add(new THREE.Vector3(pose.transform.position.x, -pose.transform.position.z, pose.transform.position.y));
-			this.scene.view.position.copy(pos);
-			
 			let rot  = new THREE.Quaternion(pose.transform.orientation.x, pose.transform.orientation.y, pose.transform.orientation.z, pose.transform.orientation.w);
 			var euler = new THREE.Euler();
 			euler.setFromQuaternion(rot,"XYZ");
@@ -2129,6 +2124,11 @@ export class Viewer extends EventDispatcher{
 			//this.scene.view.direction = d;
 			this.scene.view.pitch = -euler.x;
 			this.scene.view.yaw = -euler.y;
+			
+			// Adjust position and rotation to head movements
+			let pos = this.xrSessionStartPosition.clone();
+			pos.add(new THREE.Vector3(pose.transform.position.x, pose.transform.position.z, pose.transform.position.y));
+			this.scene.view.position.copy(pos);
 			
 			// Loop through each of the views reported by the viewer pose.
 			for (let view of pose.views) {
