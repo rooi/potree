@@ -386,6 +386,8 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			}else{
 				color = black;
 			}
+			
+			if(color == null) color = black;
 
 			const r = parseInt(255 * color[0]);
 			const g = parseInt(255 * color[1]);

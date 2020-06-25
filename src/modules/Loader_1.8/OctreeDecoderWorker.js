@@ -55,10 +55,16 @@ Potree = {};
 
 onmessage = function (event) {
 
-	let {buffer, pointAttributes, scale, min, offset} = event.data;
+	// let buffer = event.data.buffer;
+	// let pointAttributes = event.data.pointAttributes;
+	let {buffer, pointAttributes, scale, min} = event.data;
 
 	let numPoints = buffer.byteLength / pointAttributes.byteSize;
 	let cv = new CustomView(buffer);
+
+	// let scale = event.data.scale;
+	// let min = event.data.min;
+
 	
 	let attributeBuffers = {};
 	let attributeOffset = 0;
@@ -70,7 +76,7 @@ onmessage = function (event) {
 
 	for (let pointAttribute of pointAttributes.attributes) {
 		
-		if(["POSITION_CARTESIAN", "position"].includes(pointAttribute.name)){
+		if (pointAttribute.name === "POSITION_CARTESIAN") {
 			let buff = new ArrayBuffer(numPoints * 4 * 3);
 			let positions = new Float32Array(buff);
 		
@@ -78,9 +84,9 @@ onmessage = function (event) {
 				
 				let pointOffset = j * bytesPerPoint;
 
-				let x = (cv.getUint32(pointOffset + attributeOffset + 0, true) * scale[0]) + offset[0] - min.x;
-				let y = (cv.getUint32(pointOffset + attributeOffset + 4, true) * scale[1]) + offset[1] - min.y;
-				let z = (cv.getUint32(pointOffset + attributeOffset + 8, true) * scale[2]) + offset[2] - min.z;
+				let x = (cv.getUint32(pointOffset + attributeOffset + 0, true) * scale) - min.x;
+				let y = (cv.getUint32(pointOffset + attributeOffset + 4, true) * scale) - min.y;
+				let z = (cv.getUint32(pointOffset + attributeOffset + 8, true) * scale) - min.z;
 
 				positions[3 * j + 0] = x;
 				positions[3 * j + 1] = y;
@@ -88,25 +94,19 @@ onmessage = function (event) {
 			}
 
 			attributeBuffers[pointAttribute.name] = { buffer: buff, attribute: pointAttribute };
-		}else if(["RGBA", "rgba"].includes(pointAttribute.name)){
+		}else if(pointAttribute.name === "RGBA"){
 			let buff = new ArrayBuffer(numPoints * 4);
 			let colors = new Uint8Array(buff);
 
 			for (let j = 0; j < numPoints; j++) {
 				let pointOffset = j * bytesPerPoint;
 
-				let r = cv.getUint16(pointOffset + attributeOffset + 0, true);
-				let g = cv.getUint16(pointOffset + attributeOffset + 2, true);
-				let b = cv.getUint16(pointOffset + attributeOffset + 4, true);
-
-				colors[4 * j + 0] = r > 255 ? r / 256 : r;
-				colors[4 * j + 1] = g > 255 ? g / 256 : g;
-				colors[4 * j + 2] = b > 255 ? b / 256 : b;
+				colors[4 * j + 0] = cv.getUint8(pointOffset + attributeOffset + 0);
+				colors[4 * j + 1] = cv.getUint8(pointOffset + attributeOffset + 1);
+				colors[4 * j + 2] = cv.getUint8(pointOffset + attributeOffset + 2);
 			}
 
 			attributeBuffers[pointAttribute.name] = { buffer: buff, attribute: pointAttribute };
-		}else{
-
 		}
 
 		attributeOffset += pointAttribute.byteSize;

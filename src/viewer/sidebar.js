@@ -1106,8 +1106,12 @@ export class Sidebar{
 			elInput.click(event => {
 				this.viewer.setClassificationVisibility(code, event.target.checked);
 			});
+			
+			const black = [1, 1, 1, 1];
+			let cColor = black;
+			if(classification.color != null) cColor = classification.color;
 
-			let defaultColor = classification.color.map(c => c *  255).join(", ");
+			let defaultColor = cColor.map(c => c *  255).join(", ");
 			defaultColor = `rgb(${defaultColor})`;
 
 
