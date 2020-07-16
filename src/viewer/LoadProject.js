@@ -167,7 +167,7 @@ function loadOrientedImages(viewer, images){
 
 }
 
-function loadSpotLights(viewer, images){
+function loadSpotLights(viewer, data){
 
 const duplicate = viewer.scene.spotlights.find(spotlight => spotlight.uuid === data.uuid);
 	if(duplicate){
@@ -182,7 +182,7 @@ const duplicate = viewer.scene.spotlights.find(spotlight => spotlight.uuid === d
 	spotLight.position.set(...data.position);
 	spotLight.lookAt.set(...data.lookAt);
 	
-	viewer.scene.addVolume(spotLight);
+	viewer.scene.addSpotLight(spotLight);
 
 }
 

@@ -1,3 +1,4 @@
+import {Utils} from "../utils.js";
 
 export class SpotLightHelper extends THREE.Object3D{
 
@@ -6,6 +7,8 @@ export class SpotLightHelper extends THREE.Object3D{
 
 		this.light = light;
 		this.color = color;
+		
+		this.spheres = [];
 
 		//this.up.set(0, 0, 1);
 		this.updateMatrix();
@@ -17,6 +20,7 @@ export class SpotLightHelper extends THREE.Object3D{
 			this.sphere = new THREE.Mesh(sg, sm);
 			this.sphere.scale.set(0.5, 0.5, 0.5);
 			this.add(this.sphere);
+			this.spheres.push(this.sphere);
 		}
 
 		{ // LINES
@@ -45,12 +49,70 @@ export class SpotLightHelper extends THREE.Object3D{
 			this.add(this.frustum);
 
 		}
+		
+		{ // Event Listeners
+			let drag = (e) => {
+				let I = Utils.getMousePointCloudIntersection(
+					e.drag.end, 
+					e.viewer.scene.getActiveCamera(), 
+					e.viewer, 
+					e.viewer.scene.pointclouds,
+					{pickClipped: true});
+
+				if (I) {
+					let i = this.spheres.indexOf(e.drag.object);
+					if (i !== -1) {
+						//let point = this.points[i];
+						//for (let key of Object.keys(I.point).filter(e => e !== 'position')) {
+						//	point[key] = I.point[key];
+						//}
+
+						this.setPosition(i, I.location);
+					}
+				}
+			};
+
+			let drop = e => {
+				let i = this.spheres.indexOf(e.drag.object);
+				if (i !== -1) {
+					this.dispatchEvent({
+						'type': 'spotlight_helper_dropped',
+						'spotlight_helper': this,
+						'index': i
+					});
+				}
+			};
+
+			let mouseover = (e) => e.object.material.wireframe = true;
+			let mouseleave = (e) => e.object.material.wireframe = false;
+
+			this.sphere.addEventListener('drag', drag);
+			this.sphere.addEventListener('drop', drop);
+			this.sphere.addEventListener('mouseover', mouseover);
+			this.sphere.addEventListener('mouseleave', mouseleave);
+		}
 
 		this.update();
 	}
+	
+	setPosition (index, position) {
+		//let point = this.points[index];
+		//point.position.copy(position);
+		this.light.position.copy(position);
+
+		let event = {
+			type: 'spotlight_helper_moved',
+			measure:	this,
+			index:	index,
+			position: position.clone()
+		};
+		this.dispatchEvent(event);
+
+		this.update();
+	};
 
 	update(){
-
+		
 		this.light.updateMatrix();
 		this.light.updateMatrixWorld();
 

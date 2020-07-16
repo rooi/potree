@@ -36,6 +36,7 @@ export class Scene extends EventDispatcher{
 		this.images360 = [];
 		this.geopackages = [];
 		this.spotLights = [];
+		this.spotLightHelpers = [];
 		
 		this.fpControls = null;
 		this.orbitControls = null;
@@ -212,18 +213,29 @@ export class Scene extends EventDispatcher{
 		}
 	};
 	
-    addSpotLight(spotLight){
+    addSpotLight(spotLight, spotLightHelper){
 		this.spotLights.push(spotLight);
 		this.scene.add(spotLight);
-
+		
 		this.dispatchEvent({
 			'type': 'spotlight_added',
 			'scene': this,
 			'spotlight': spotLight
 		});
+		
+		if(spotLightHelper) {
+			this.spotLightHelpers.push(spotLightHelper);
+			this.scene.add(spotLightHelper);
+			
+			this.dispatchEvent({
+				'type': 'spotlight_helper_added',
+				'scene': this,
+				'spotlight_helper': spotLightHelper
+			});
+		}
 	};
 
-	removeSpotLight(spotLight){
+	removeSpotLight(spotLight, spotLightHelper){
 		let index = this.spotLights.indexOf(spotLight);
 		if (index > -1) {
 			this.spotLights.splice(index, 1);
@@ -231,8 +243,21 @@ export class Scene extends EventDispatcher{
 			this.dispatchEvent({
 				'type': 'spotlight_removed',
 				'scene': this,
-				'spotlight': spotlight
+				'spotlight': spotLight
 			});
+		}
+		
+		if(spotLightHelper) {
+			let indexSph = this.spotLightHelpers.indexOf(spotLightHelper);
+			if (indexSph > -1 && index == indexSph) {
+				this.spotLightHelper.splice(indexSph, 1);
+
+				this.dispatchEvent({
+					'type': 'spotlight_helper_removed',
+					'scene': this,
+					'spotlight_helper': spotLightHelper
+				});
+			}
 		}
 	};
 

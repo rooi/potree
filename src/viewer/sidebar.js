@@ -669,8 +669,24 @@ export class Sidebar{
 			const node = createNode(otherID, "spotLight", spotLightIcon, spotLight);
 
 			spotLight.addEventListener("visibility_changed", () => {
-				spotLight.visible != spotLight.visible;
+
 				if(spotLight.visible){
+					tree.jstree('check_node', node);
+				}else{
+					tree.jstree('uncheck_node', node);
+				}
+			});
+		};
+		
+		let onSpotLightHelperAdded = (e) => {
+			const spotLightHelper = e.spotLightHelper;
+
+			const spotLightHelperIcon = `${Potree.resourcePath}/icons/picture.svg`;
+			const node = createNode(otherID, "spotLightHelper", spotLightHelperIcon, spotLightHelper);
+
+			spotLightHelper.addEventListener("visibility_changed", () => {
+
+				if(spotLightHelper.visible){
 					tree.jstree('check_node', node);
 				}else{
 					tree.jstree('uncheck_node', node);
@@ -688,6 +704,8 @@ export class Sidebar{
 		this.viewer.scene.addEventListener("geopackage_added", onGeopackageAdded);
 		this.viewer.scene.addEventListener("polygon_clip_volume_added", onVolumeAdded);
 		this.viewer.scene.annotations.addEventListener("annotation_added", onAnnotationAdded);
+		this.viewer.scene.addEventListener("spotlight_added", onSpotLightAdded);
+		this.viewer.scene.addEventListener("spotlight_helper_added", onSpotLightHelperAdded);
 
 		let onMeasurementRemoved = (e) => {
 			let measurementsRoot = $("#jstree_scene").jstree().get_json("measurements");
@@ -723,12 +741,20 @@ export class Sidebar{
 			
 			tree.jstree("delete_node", jsonNode.id);
 		};
+		
+		let onSpotLightHelperRemoved = (e) => {
+			let otherRoot = $("#jstree_scene").jstree().get_json("other");
+			let jsonNode = otherRoot.children.find(child => child.data.uuid === e.item.uuid);
+			
+			tree.jstree("delete_node", jsonNode.id);
+		};
 
 		this.viewer.scene.addEventListener("measurement_removed", onMeasurementRemoved);
 		this.viewer.scene.addEventListener("volume_removed", onVolumeRemoved);
 		this.viewer.scene.addEventListener("polygon_clip_volume_removed", onPolygonClipVolumeRemoved);
 		this.viewer.scene.addEventListener("profile_removed", onProfileRemoved);
 		this.viewer.scene.addEventListener("spotlight_removed", onSpotLightRemoved);
+		this.viewer.scene.addEventListener("spotlight_helper_removed", onSpotLightHelperRemoved);
 
 		{
 			let annotationIcon = `${Potree.resourcePath}/icons/annotation.svg`;
@@ -776,6 +802,10 @@ export class Sidebar{
 		
 		for(let spotLight of scene.spotLights){
 			onSpotLightAdded({spotLight: spotLight});
+		}
+		
+		for(let spotLightHelper of scene.spotLightHelpers){
+			onSpotLightHelperAdded({spotLightHelper: spotLightHelper});
 		}
 
 		{
