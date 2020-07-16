@@ -501,7 +501,7 @@ export class Sidebar{
 				let position = object.position;
 				let target = new THREE.Vector3().addVectors(
 					position, 
-					object.getWorldDirection(new THREE.Vector3()).multiplyScalar(distance));
+					object.getWorldDirection(new THREE.Vector3()).multiplyScalar(-distance));
 
 				this.viewer.scene.view.position.copy(object.position);
 				this.viewer.scene.view.lookAt(target);
@@ -661,6 +661,21 @@ export class Sidebar{
 			}
 
 		};
+		
+		let onSpotLightAdded = (e) => {
+			const spotLight = e.spotLight;
+
+			const spotLightIcon = `${Potree.resourcePath}/icons/picture.svg`;
+			const node = createNode(otherID, "spotLight", spotLightIcon, spotLight);
+
+			spotLight.addEventListener("visibility_changed", () => {
+				if(spotLight.visible){
+					tree.jstree('check_node', node);
+				}else{
+					tree.jstree('uncheck_node', node);
+				}
+			});
+		};
 
 		this.viewer.scene.addEventListener("pointcloud_added", onPointCloudAdded);
 		this.viewer.scene.addEventListener("measurement_added", onMeasurementAdded);
@@ -700,11 +715,19 @@ export class Sidebar{
 			
 			tree.jstree("delete_node", jsonNode.id);
 		};
+		
+		let onSpotLightRemoved = (e) => {
+			let otherRoot = $("#jstree_scene").jstree().get_json("other");
+			let jsonNode = otherRoot.children.find(child => child.data.uuid === e.item.uuid);
+			
+			tree.jstree("delete_node", jsonNode.id);
+		};
 
 		this.viewer.scene.addEventListener("measurement_removed", onMeasurementRemoved);
 		this.viewer.scene.addEventListener("volume_removed", onVolumeRemoved);
 		this.viewer.scene.addEventListener("polygon_clip_volume_removed", onPolygonClipVolumeRemoved);
 		this.viewer.scene.addEventListener("profile_removed", onProfileRemoved);
+		this.viewer.scene.addEventListener("spotlight_removed", onSpotLightRemoved);
 
 		{
 			let annotationIcon = `${Potree.resourcePath}/icons/annotation.svg`;
@@ -748,6 +771,10 @@ export class Sidebar{
 
 		for(let profile of scene.profiles){
 			onProfileAdded({profile: profile});
+		}
+		
+		for(let spotLight of scene.spotLights){
+			onSpotLightAdded({spotLight: spotLight});
 		}
 
 		{

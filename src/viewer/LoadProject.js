@@ -167,6 +167,25 @@ function loadOrientedImages(viewer, images){
 
 }
 
+function loadSpotLights(viewer, images){
+
+const duplicate = viewer.scene.spotlights.find(spotlight => spotlight.uuid === data.uuid);
+	if(duplicate){
+		return;
+	}
+
+	let spotLight = new THREE.SpotLight();
+
+	spotLight.uuid = data.uuid;
+	spotLight.distance = data.distance;
+	spotLight.angle = data.angle;
+	spotLight.position.set(...data.position);
+	spotLight.lookAt.set(...data.lookAt);
+	
+	viewer.scene.addVolume(spotLight);
+
+}
+
 function loadGeopackage(viewer, geopackage){
 
 	const path = geopackage.path;
@@ -364,6 +383,10 @@ export async function loadProject(viewer, data){
 		for(const images of data.orientedImages){
 			loadOrientedImages(viewer, images);
 		}
+	}
+	
+	for(const spotLight of data.spotLights){
+		loadSpotLight(viewer, spotLight);
 	}
 
 	loadAnnotations(viewer, data.annotations);

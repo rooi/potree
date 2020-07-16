@@ -22,6 +22,7 @@ import {ProfilePanel} from "./ProfilePanel.js";
 import {CameraPanel} from "./CameraPanel.js";
 import {AnnotationPanel} from "./AnnotationPanel.js";
 import { CameraAnimationPanel } from "./CameraAnimationPanel.js";
+import {SpotLightPanel} from "./SpotLightPanel.js";
 
 export class PropertiesPanel{
 
@@ -60,6 +61,8 @@ export class PropertiesPanel{
 			this.setAnnotation(object);
 		}else if(object instanceof CameraAnimation){
 			this.setCameraAnimation(object);
+		}else if(object instanceof THREE.SpotLight){
+			this.setSpotLight(object);
 		}
 		
 	}
@@ -889,6 +892,11 @@ export class PropertiesPanel{
 
 	setCamera(camera){
 		let panel = new CameraPanel(this.viewer, this);
+		this.container.append(panel.elContent);
+	}
+	
+	setSpotLight(spotLight){
+		let panel = new SpotLightPanel(this.viewer, spotLight, this);
 		this.container.append(panel.elContent);
 	}
 

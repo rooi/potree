@@ -35,6 +35,7 @@ export class Scene extends EventDispatcher{
 		this.orientedImages = [];
 		this.images360 = [];
 		this.geopackages = [];
+		this.spotLights = [];
 		
 		this.fpControls = null;
 		this.orbitControls = null;
@@ -207,6 +208,30 @@ export class Scene extends EventDispatcher{
 				'type': 'geopackage_removed',
 				'scene': this,
 				'geopackage': geopackage
+			});
+		}
+	};
+	
+    addSpotLight(spotLight){
+		this.spotLights.push(spotLight);
+		this.scene.add(spotLight);
+
+		this.dispatchEvent({
+			'type': 'spotlight_added',
+			'scene': this,
+			'spotlight': spotLight
+		});
+	};
+
+	removeSpotLight(spotLight){
+		let index = this.spotLights.indexOf(spotLight);
+		if (index > -1) {
+			this.spotLights.splice(index, 1);
+
+			this.dispatchEvent({
+				'type': 'spotlight_removed',
+				'scene': this,
+				'spotlight': spotlight
 			});
 		}
 	};
