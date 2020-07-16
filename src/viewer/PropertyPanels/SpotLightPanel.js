@@ -64,7 +64,7 @@ export class SpotLightPanel{
 		});
 
 		//this.propertiesPanel.addVolatileListener(viewer, "spotlight_changed", this._update);
-
+		
 		this.update();
 	}
 

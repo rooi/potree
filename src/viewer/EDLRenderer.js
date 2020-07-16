@@ -209,7 +209,9 @@ export class EDLRenderer{
 		let lights = [];
 		viewer.scene.scene.traverse(node => {
 			if(node instanceof THREE.SpotLight){
-				lights.push(node);
+				if(node.visible) {
+					lights.push(node);
+				}
 			}
 		});
 

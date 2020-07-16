@@ -669,6 +669,7 @@ export class Sidebar{
 			const node = createNode(otherID, "spotLight", spotLightIcon, spotLight);
 
 			spotLight.addEventListener("visibility_changed", () => {
+				spotLight.visible != spotLight.visible;
 				if(spotLight.visible){
 					tree.jstree('check_node', node);
 				}else{
