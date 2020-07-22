@@ -6,6 +6,7 @@ import {Annotation} from "../../Annotation.js";
 import {Measure} from "../../utils/Measure.js";
 import {Profile} from "../../utils/Profile.js";
 import {Volume, BoxVolume, SphereVolume} from "../../utils/Volume.js";
+import {SpotLightHelper} from "../../utils/SpotLightHelper.js";
 import {CameraAnimation} from "../../modules/CameraAnimation/CameraAnimation.js";
 import {PointSizeType, PointShape, ElevationGradientRepeat} from "../../defines.js";
 import {Gradients} from "../../materials/Gradients.js";
@@ -23,6 +24,7 @@ import {CameraPanel} from "./CameraPanel.js";
 import {AnnotationPanel} from "./AnnotationPanel.js";
 import { CameraAnimationPanel } from "./CameraAnimationPanel.js";
 import {SpotLightPanel} from "./SpotLightPanel.js";
+import {SpotLightHelperPanel} from "./SpotLightHelperPanel.js";
 
 export class PropertiesPanel{
 
@@ -63,6 +65,8 @@ export class PropertiesPanel{
 			this.setCameraAnimation(object);
 		}else if(object instanceof THREE.SpotLight){
 			this.setSpotLight(object);
+		}else if(object instanceof SpotLightHelper){
+			this.setSpotLightHelper(object);
 		}
 		
 	}
@@ -897,6 +901,11 @@ export class PropertiesPanel{
 	
 	setSpotLight(spotLight){
 		let panel = new SpotLightPanel(this.viewer, spotLight, this);
+		this.container.append(panel.elContent);
+	}
+	
+	setSpotLightHelper(spotLightHelper){
+		let panel = new SpotLightHelperPanel(this.viewer, spotLightHelper, this);
 		this.container.append(panel.elContent);
 	}
 

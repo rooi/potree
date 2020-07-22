@@ -110,6 +110,51 @@ export class SpotLightHelper extends THREE.Object3D{
 
 		this.update();
 	};
+	
+	setLookAt (index, lookAtPosition) {
+		//let point = this.points[index];
+		//point.position.copy(position);
+
+		this.light.lookAt(lookAtPosition);
+
+		let event = {
+			type: 'spotlight_helper_rotated',
+			measure:	this,
+			index:	index,
+			lookAt: lookAtPosition.clone()
+		};
+		this.dispatchEvent(event);
+
+		this.update();
+	};
+	
+	setDistance(d) {
+		this.light.distance = d;
+		
+		this.update();
+	}
+	
+	setAngle(a) {
+		this.light.angle = a;
+		
+		this.update();
+	}
+	
+	getTarget() {
+		let target = new THREE.Vector3().addVectors(
+			this.light.position, this.light.getWorldDirection(new THREE.Vector3()).multiplyScalar(-1));
+			
+		return target;
+	}
+	
+	getDistance() {
+		return (this.light.distance > 0) ? this.light.distance / 4 : 5 * 1000;
+	}
+	
+	getAngle() {
+		return this.light.angle * 180 / Math.PI;
+	}
+	
 
 	update(){
 		

@@ -275,6 +275,21 @@ export class Sidebar{
 				this.viewer.scene.removeAllMeasurements();
 			}
 		));
+		
+		// Spotlight
+		elToolbar.append(this.createToolIcon(
+			Potree.resourcePath + '/icons/spotlight.svg',
+			'[title]tt.add_spotlight',
+			() => {
+				let light = new THREE.SpotLight();
+				light.distance = 15;
+				light.angle = (60 / 180) * Math.PI;
+				light.position.set(8.489, 3.577, 5.796);
+				light.lookAt(new THREE.Vector3(1.219, -0.171, 2.776));
+				let sph = new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
+				this.viewer.scene.addSpotLight(light, sph);
+			}
+		));
 
 
 		{ // SHOW / HIDE Measurements
@@ -663,9 +678,9 @@ export class Sidebar{
 		};
 		
 		let onSpotLightAdded = (e) => {
-			const spotLight = e.spotLight;
+			const spotLight = e.spotlight;
 
-			const spotLightIcon = `${Potree.resourcePath}/icons/picture.svg`;
+			const spotLightIcon = `${Potree.resourcePath}/icons/spotlight.svg`;
 			const node = createNode(otherID, "spotLight", spotLightIcon, spotLight);
 
 			spotLight.addEventListener("visibility_changed", () => {
@@ -679,7 +694,7 @@ export class Sidebar{
 		};
 		
 		let onSpotLightHelperAdded = (e) => {
-			const spotLightHelper = e.spotLightHelper;
+			const spotLightHelper = e.spotlight_helper;
 
 			const spotLightHelperIcon = `${Potree.resourcePath}/icons/picture.svg`;
 			const node = createNode(otherID, "spotLightHelper", spotLightHelperIcon, spotLightHelper);
@@ -801,11 +816,11 @@ export class Sidebar{
 		}
 		
 		for(let spotLight of scene.spotLights){
-			onSpotLightAdded({spotLight: spotLight});
+			onSpotLightAdded({spotlight: spotLight});
 		}
 		
 		for(let spotLightHelper of scene.spotLightHelpers){
-			onSpotLightHelperAdded({spotLightHelper: spotLightHelper});
+			onSpotLightHelperAdded({spotlight_helper: spotLightHelper});
 		}
 
 		{
