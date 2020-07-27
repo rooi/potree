@@ -837,7 +837,7 @@ export class PointCloudOctree extends PointCloudTree {
 		{ // RENDER
 			renderer.setRenderTarget(pickState.renderTarget);
 			gl.clearColor(0, 0, 0, 0);
-			renderer.clear(true, true, true);
+//Roy			renderer.clear(true, true, true);
 
 			let tmp = this.material;
 			this.material = pickMaterial;

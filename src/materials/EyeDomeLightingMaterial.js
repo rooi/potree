@@ -16,18 +16,20 @@ export class EyeDomeLightingMaterial extends THREE.RawShaderMaterial{
 		super();
 
 		let uniforms = {
-			screenWidth:    { type: 'f', 	value: 0 },
-			screenHeight:   { type: 'f', 	value: 0 },
-			edlStrength:    { type: 'f', 	value: 1.0 },
-			uNear:          { type: 'f', 	value: 1.0 },
-			uFar:           { type: 'f', 	value: 1.0 },
-			radius:         { type: 'f', 	value: 1.0 },
-			neighbours:     { type: '2fv', 	value: [] },
-			depthMap:       { type: 't', 	value: null },
-			uEDLColor:      { type: 't', 	value: null },
-			uEDLDepth:      { type: 't', 	value: null },
-			opacity:        { type: 'f',	value: 1.0 },
-			uProj:          { type: "Matrix4fv", value: [] },
+			screenWidth:         { type: 'f', 	value: 0 },
+			screenHeight:        { type: 'f', 	value: 0 },
+			edlStrength:         { type: 'f', 	value: 1.0 },
+			uNear:               { type: 'f', 	value: 1.0 },
+			uFar:                { type: 'f', 	value: 1.0 },
+			radius:              { type: 'f', 	value: 1.0 },
+			neighbours:          { type: '2fv', 	value: [] },
+			depthMap:            { type: 't', 	value: null },
+			uEDLColor:           { type: 't', 	value: null },
+			uEDLDepth:           { type: 't', 	value: null },
+			opacity:             { type: 'f',	value: 1.0 },
+			useTransparentColor: { type: 'b',	value: true },
+			transparentColor:    { type: 'vec3',	value: [1,1,1] },
+			uProj:               { type: "Matrix4fv", value: [] },
 		};
 
 		this.setValues({
@@ -80,6 +82,5 @@ export class EyeDomeLightingMaterial extends THREE.RawShaderMaterial{
 		}
 	}
 
-	
 }
 

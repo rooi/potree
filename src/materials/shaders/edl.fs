@@ -16,6 +16,9 @@ uniform float edlStrength;
 uniform float radius;
 uniform float opacity;
 
+uniform bool useTransparentColor;
+uniform vec3 transparentColor;
+
 uniform float uNear;
 uniform float uFar;
 
@@ -30,6 +33,9 @@ float response(float depth){
 	vec2 uvRadius = radius / vec2(screenWidth, screenHeight);
 	
 	float sum = 0.0;
+	
+	// Hack to make point transparent
+	vec4 cEDL = texture2D(uEDLColor, vUv);
 	
 	for(int i = 0; i < NEIGHBOUR_COUNT; i++){
 		vec2 uvNeighbor = vUv + uvRadius * neighbours[i];
@@ -57,7 +63,17 @@ void main(){
 	float res = response(depth);
 	float shade = exp(-res * 300.0 * edlStrength);
 
-	gl_FragColor = vec4(cEDL.rgb * shade, opacity);
+	float _opacity = opacity;
+	if(useTransparentColor)
+	{
+		if(cEDL.rgb == transparentColor)
+		{
+			_opacity = 0.1;
+			//depth = 0.0;
+		}
+	}
+	gl_FragColor = vec4(cEDL.rgb * shade, _opacity);
+	
 
 	{ // write regular hyperbolic depth values to depth buffer
 		float dl = pow(2.0, depth);

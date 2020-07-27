@@ -65,7 +65,6 @@ export class PointCloudSM{
 
 		this.threeRenderer.setRenderTarget(this.target);
 		this.threeRenderer.clear(true, true, true);
-
 		this.potreeRenderer.render(scene, this.camera, this.target, {});
 
 		this.threeRenderer.setRenderTarget(oldTarget);

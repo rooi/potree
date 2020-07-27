@@ -15,7 +15,8 @@ export class EDLRenderer{
 
 		this.gl = viewer.renderer.getContext();
 
-		this.shadowMap = new PointCloudSM(this.viewer.pRenderer);
+		//this.shadowMap = new PointCloudSM(this.viewer.pRenderer);
+		this.shadowMaps = [];
 	}
 
 	initEDL(){
@@ -154,33 +155,39 @@ export class EDLRenderer{
 
 		const doShadows = lights.length > 0 && !(lights[0].disableShadowUpdates);
 		if(doShadows){
-			let light = lights[0];
+		
+			for(var i=0; i<lights.length; i++) {
+				let light = lights[i];
+			
+				if(this.shadowMaps.length <= i) {
+					this.shadowMaps[i] = new PointCloudSM(this.viewer.pRenderer);
+				}
+				
+				this.shadowMaps[i].setLight(light);
 
-			this.shadowMap.setLight(light);
+				let originalAttributes = new Map();
+				for(let pointcloud of viewer.scene.pointclouds){
+					// TODO IMPORTANT !!! check
+					originalAttributes.set(pointcloud, pointcloud.material.activeAttributeName);
+					pointcloud.material.disableEvents();
+					pointcloud.material.activeAttributeName = "depth";
+					//pointcloud.material.pointColorType = PointColorType.DEPTH;
+				}
 
-			let originalAttributes = new Map();
-			for(let pointcloud of viewer.scene.pointclouds){
-				// TODO IMPORTANT !!! check
-				originalAttributes.set(pointcloud, pointcloud.material.activeAttributeName);
-				pointcloud.material.disableEvents();
-				pointcloud.material.activeAttributeName = "depth";
-				//pointcloud.material.pointColorType = PointColorType.DEPTH;
+				this.shadowMaps[i].render(viewer.scene.scenePointCloud, camera);
+
+				for(let pointcloud of visiblePointClouds){
+					let originalAttribute = originalAttributes.get(pointcloud);
+					// TODO IMPORTANT !!! check
+					pointcloud.material.activeAttributeName = originalAttribute;
+					pointcloud.material.enableEvents();
+				}
+
+				viewer.shadowTestCam.updateMatrixWorld();
+				viewer.shadowTestCam.matrixWorldInverse.getInverse(viewer.shadowTestCam.matrixWorld);
+				viewer.shadowTestCam.updateProjectionMatrix();
 			}
-
-			this.shadowMap.render(viewer.scene.scenePointCloud, camera);
-
-			for(let pointcloud of visiblePointClouds){
-				let originalAttribute = originalAttributes.get(pointcloud);
-				// TODO IMPORTANT !!! check
-				pointcloud.material.activeAttributeName = originalAttribute;
-				pointcloud.material.enableEvents();
-			}
-
-			viewer.shadowTestCam.updateMatrixWorld();
-			viewer.shadowTestCam.matrixWorldInverse.getInverse(viewer.shadowTestCam.matrixWorld);
-			viewer.shadowTestCam.updateProjectionMatrix();
 		}
-
 	}
 
 	render(params){
@@ -250,7 +257,7 @@ export class EDLRenderer{
 			if(lights.length > 0){
 				viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
 					clipSpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
-					shadowMaps: [this.shadowMap],
+					shadowMaps: this.shadowMaps,
 					transparent: false,
 				});
 			}else{
