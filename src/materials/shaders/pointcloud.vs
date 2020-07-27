@@ -106,7 +106,11 @@ uniform vec2 uExtraRange;
 uniform float uExtraScale;
 uniform float uExtraOffset;
 
-uniform vec3 uShadowColor;
+#if defined(num_shadowcolors) && num_shadowcolors > 0
+uniform vec3 uShadowColor[num_shadowcolors];
+#else
+uniform vec3 uShadowColor[1];
+#endif
 
 uniform sampler2D visibleNodes;
 uniform sampler2D gradient;
@@ -913,7 +917,13 @@ void main() {
 				//vColor = vec3(0.0, 0.0, 0.2);
 			}else{
 				//vColor = vec3(1.0, 1.0, 1.0) * visibility + vec3(1.0, 1.0, 1.0) * vec3(0.5, 0.0, 0.0) * (1.0 - visibility);
-				vColor = vColor * visibility + vColor * uShadowColor * (1.0 - visibility);
+				
+				int colorIndex = 0;
+				#if defined(num_shadowcolors) && num_shadowcolors > 0
+					if(num_shadowcolors >= i) colorIndex = i;
+				#endif
+				vec3 shadowColor = uShadowColor[colorIndex];
+				vColor = vColor * visibility + vColor * shadowColor * (1.0 - visibility);
 			}
 
 

@@ -822,9 +822,10 @@ export class Renderer {
 			if (shadowMaps.length > 0) {
 
 				const lShadowMap = shader.uniformLocations["uShadowMap[0]"];
-
-				shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
-
+				
+				const lShadowColor = shader.uniformLocations["uShadowColor[0]"];
+				gl.uniform3fv(lShadowColor, material.uniforms.uShadowColor.value);
+				
 				let bindingStart = 5;
 				let bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
 				gl.uniform1iv(lShadowMap, bindingPoints);
@@ -1085,9 +1086,11 @@ export class Renderer {
 				let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
 				let numClipSpheres = (params.clipSpheres && params.clipSpheres.length) ? params.clipSpheres.length : 0;
 				let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
+				let numShadowColors = (material.uniforms.uShadowColor && material.uniforms.uShadowColor.value) ? material.uniforms.uShadowColor.value.length / 3 : 0;
 
 				let defines = [
 					`#define num_shadowmaps ${shadowMaps.length}`,
+					`#define num_shadowcolors ${numShadowColors}`,
 					`#define num_snapshots ${numSnapshots}`,
 					`#define num_clipboxes ${numClipBoxes}`,
 					`#define num_clipspheres ${numClipSpheres}`,

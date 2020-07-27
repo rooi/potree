@@ -76,7 +76,8 @@
 			material.size = 1;
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
 			material.activeAttributeName = "elevation";
-			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6];
+			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6,
+													0.6, 0.0, 0.0];
 
 			viewer.scene.view.position.set(19.474, -14.324, 12.829);
 			viewer.scene.view.lookAt(0.339, 0.145, 4.073);
@@ -89,7 +90,8 @@
 			let material = e.pointcloud.material;
 			material.size = 1;
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
-			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6];
+			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6,
+													0.6, 0.0, 0.0];
 			
 			e.pointcloud.position.set(0, -2, 0);
 			
