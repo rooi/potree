@@ -16,9 +16,11 @@ export class SpotLightHelper extends THREE.Object3D{
 
 		{ // SPHERE
 			let sg = new THREE.SphereGeometry(1, 32, 32);
-			let sm = new THREE.MeshNormalMaterial();
+			let sm = new THREE.MeshNormalMaterial({depthTest: false,depthWrite: false});
+			
 			this.sphere = new THREE.Mesh(sg, sm);
-			this.sphere.scale.set(0.5, 0.5, 0.5);
+			//this.sphere.scale.set(0.1, 0.1, 0.1);
+			
 			this.add(this.sphere);
 			this.spheres.push(this.sphere);
 		}
@@ -83,8 +85,12 @@ export class SpotLightHelper extends THREE.Object3D{
 				}
 			};
 
-			let mouseover = (e) => e.object.material.wireframe = true;
-			let mouseleave = (e) => e.object.material.wireframe = false;
+			let mouseover = (e) => {
+				e.object.material.wireframe = true;
+			};
+			let mouseleave = (e) => {
+				e.object.material.wireframe = false;
+			};
 
 			this.sphere.addEventListener('drag', drag);
 			this.sphere.addEventListener('drop', drop);
@@ -92,7 +98,7 @@ export class SpotLightHelper extends THREE.Object3D{
 			this.sphere.addEventListener('mouseleave', mouseleave);
 		}
 
-		this.update();
+		this.updateProperties();
 	}
 	
 	setPosition (index, position) {
@@ -108,7 +114,7 @@ export class SpotLightHelper extends THREE.Object3D{
 		};
 		this.dispatchEvent(event);
 
-		this.update();
+		this.updateProperties();
 	};
 	
 	setLookAt (index, lookAtPosition) {
@@ -125,19 +131,19 @@ export class SpotLightHelper extends THREE.Object3D{
 		};
 		this.dispatchEvent(event);
 
-		this.update();
+		this.updateProperties();
 	};
 	
 	setDistance(d) {
 		this.light.distance = d;
 		
-		this.update();
+		this.updateProperties();
 	}
 	
 	setAngle(a) {
 		this.light.angle = a;
 		
-		this.update();
+		this.updateProperties();
 	}
 	
 	getTarget() {
@@ -155,8 +161,11 @@ export class SpotLightHelper extends THREE.Object3D{
 		return this.light.angle * 180 / Math.PI;
 	}
 	
+	setViewer(viewer) {
+		this.viewer = viewer;
+	}
 
-	update(){
+	updateProperties(){
 		
 		this.light.updateMatrix();
 		this.light.updateMatrixWorld();
@@ -200,6 +209,25 @@ export class SpotLightHelper extends THREE.Object3D{
 		//	this.camera.updateMatrixWorld();
 		//	this.camera.matrixWorldInverse.getInverse(this.camera.matrixWorld);
 		//}
+	}
+		
+	update() {
+		if(this.viewer) {
+			let camera = this.viewer.scene.getActiveCamera();
+			
+			const renderAreaSize = this.viewer.renderer.getSize(new THREE.Vector2());
+			let clientWidth = renderAreaSize.width;
+			let clientHeight = renderAreaSize.height;
+			
+			// make size independant of distance
+			// spheres
+			for(let sphere of this.spheres){
+				let distance = camera.position.distanceTo(sphere.getWorldPosition(new THREE.Vector3()));
+				let pr = Utils.projectedRadius(1, camera, distance, clientWidth, clientHeight);
+				let scale = (10 / pr);
+				sphere.scale.set(scale, scale, scale);
+			}
+		}
 
 	}
 

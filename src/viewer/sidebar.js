@@ -698,6 +698,9 @@ export class Sidebar{
 
 			const spotLightHelperIcon = `${Potree.resourcePath}/icons/picture.svg`;
 			const node = createNode(otherID, "spotLightHelper", spotLightHelperIcon, spotLightHelper);
+			
+			spotLightHelper.setViewer(this.viewer);
+			viewer.addEventListener("update", spotLightHelper.update.bind(spotLightHelper));
 
 			spotLightHelper.addEventListener("visibility_changed", () => {
 
