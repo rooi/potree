@@ -16,7 +16,7 @@ export class SpotLightHelper extends THREE.Object3D{
 
 		{ // SPHERE
 			let sg = new THREE.SphereGeometry(1, 32, 32);
-			let sm = new THREE.MeshNormalMaterial({depthTest: false,depthWrite: false});
+			let sm = new THREE.MeshNormalMaterial();
 			
 			this.sphere = new THREE.Mesh(sg, sm);
 			//this.sphere.scale.set(0.1, 0.1, 0.1);

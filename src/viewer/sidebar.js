@@ -281,13 +281,42 @@ export class Sidebar{
 			Potree.resourcePath + '/icons/spotlight.svg',
 			'[title]tt.add_spotlight',
 			() => {
-				let light = new THREE.SpotLight();
-				light.distance = 15;
-				light.angle = (60 / 180) * Math.PI;
-				light.position.set(8.489, 3.577, 5.796);
-				light.lookAt(new THREE.Vector3(1.219, -0.171, 2.776));
-				let sph = new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
-				this.viewer.scene.addSpotLight(light, sph);
+				let domElement = this.viewer.renderer.domElement;
+				let insertionCallback = (e) => {
+					if (e.button === THREE.MOUSE.LEFT) {
+						let rect = domElement.getBoundingClientRect();
+						let x = e.clientX - rect.left;
+						let y = e.clientY - rect.top;
+						let mouse = new THREE.Vector2(x, y);
+		
+						let I = Utils.getMousePointCloudIntersection(
+							mouse, 
+							this.viewer.scene.getActiveCamera(), 
+							this.viewer, 
+							this.viewer.scene.pointclouds,
+							{pickClipped: false});
+						
+						let light = new THREE.SpotLight();
+						light.distance = 15;
+						light.angle = (60 / 180) * Math.PI;
+						light.position.set(I.location.x, I.location.y, I.location.z);
+						//light.lookAt(new THREE.Vector3(1.0, 0, 0) + I.location);
+						let sph = new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
+						this.viewer.scene.addSpotLight(light, sph);
+						cancelCallback();
+
+					} else if (e.button === THREE.MOUSE.RIGHT) {
+						cancelCallback();
+					}
+				};
+
+				let cancelCallback = e => {
+					domElement.removeEventListener('mousedown', insertionCallback, true);
+					this.viewer.removeEventListener('cancel_insertions', cancelCallback);
+				};
+				
+				this.viewer.addEventListener('cancel_insertions', cancelCallback);
+				domElement.addEventListener('mousedown', insertionCallback, true);
 			}
 		));
 
