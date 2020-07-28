@@ -298,9 +298,9 @@ export class Sidebar{
 						
 						let light = new THREE.SpotLight();
 						light.distance = 15;
-						light.angle = (60 / 180) * Math.PI;
+						light.angle = (90 / 180) * Math.PI;
 						light.position.set(I.location.x, I.location.y, I.location.z);
-						//light.lookAt(new THREE.Vector3(1.0, 0, 0) + I.location);
+						light.lookAt(new THREE.Vector3(1.0 + I.location.x, I.location.y, I.location.z));
 						let sph = new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
 						this.viewer.scene.addSpotLight(light, sph);
 						cancelCallback();
