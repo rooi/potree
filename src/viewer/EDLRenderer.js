@@ -17,6 +17,8 @@ export class EDLRenderer{
 
 		//this.shadowMap = new PointCloudSM(this.viewer.pRenderer);
 		this.shadowMaps = [];
+		
+		this.lastShadowRenderTime = 0;
 	}
 
 	initEDL(){
@@ -250,7 +252,15 @@ export class EDLRenderer{
 			viewer.renderer.render(viewer.scene.sceneBG, viewer.scene.cameraBG);
 		} 
 
-		this.renderShadowMap(visiblePointClouds, camera, lights);
+		if(lights.length > 2) {
+			if(viewer.clock.getElapsedTime() > (this.lastShadowRenderTime + 1)) {
+				this.lastShadowRenderTime = viewer.clock.getElapsedTime();
+				this.renderShadowMap(visiblePointClouds, camera, lights);
+			}
+		}
+		else {
+			this.renderShadowMap(visiblePointClouds, camera, lights);
+		}
 
 		{ // COLOR & DEPTH PASS
 			for (let pointcloud of visiblePointClouds) {

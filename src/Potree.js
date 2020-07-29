@@ -53,6 +53,7 @@ export * from "./utils/Profile.js";
 export * from "./utils/ProfileTool.js";
 export * from "./utils/ScreenBoxSelectTool.js";
 export * from "./utils/SpotLightHelper.js";
+export * from "./utils/PointLightHelper.js";
 export * from "./utils/TransformationTool.js";
 export * from "./utils/Volume.js";
 export * from "./utils/VolumeTool.js";

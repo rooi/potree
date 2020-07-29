@@ -817,6 +817,7 @@ export class Sidebar{
 			
 			pointLightHelper.setViewer(this.viewer);
 			viewer.addEventListener("update", pointLightHelper.update.bind(pointLightHelper));
+			viewer.addEventListener("render.pass.scene", pointLightHelper.render.bind(pointLightHelper));
 
 			pointLightHelper.addEventListener("visibility_changed", () => {
 

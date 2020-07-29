@@ -66,7 +66,17 @@
 		light.position.set(8.489, 3.577, 5.796);
 		light.lookAt(new THREE.Vector3(1.219, -0.171, 2.776));
 		let sph = new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
-		viewer.scene.addSpotLight(light, sph);
+		//viewer.scene.addSpotLight(light, sph);
+		
+		{
+			//const light1 = new THREE.PointLight( 0xff00ff, 100); 
+			//light1.position.set( 15, -15, 3 ); 
+			//viewer.scene.scene.add(light1);
+
+			const light2 = new THREE.PointLight();// 0xffff00, 1000); 
+			light2.position.set( 8.489, 3.577, 5.796 ); 
+			viewer.scene.addPointLight(light2);
+		}
 		
 		// Sigeom
 		Potree.loadPointCloud("http://5.9.65.151/mschuetz/potree/resources/pointclouds/archpro/heidentor/cloud.js", "Heidentor", function(e){
@@ -76,8 +86,7 @@
 			material.size = 1;
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
 			material.activeAttributeName = "elevation";
-			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6,
-													0.6, 0.0, 0.0];
+			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6];
 
 			viewer.scene.view.position.set(19.474, -14.324, 12.829);
 			viewer.scene.view.lookAt(0.339, 0.145, 4.073);
@@ -90,8 +99,7 @@
 			let material = e.pointcloud.material;
 			material.size = 1;
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
-			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6,
-													0.6, 0.0, 0.0];
+			material.uniforms.uShadowColor.value = [0.6, 0.6, 0.6];
 			
 			e.pointcloud.position.set(0, -2, 0);
 			

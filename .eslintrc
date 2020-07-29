@@ -9,7 +9,7 @@
 		"Blob": false,
 		"i18n": false,
 		"URL": false,
-		"Stats": false,
+		"Stats": true,
 		"ProgressBar": false,
 		"d3": false,
 		"btoa": false,
