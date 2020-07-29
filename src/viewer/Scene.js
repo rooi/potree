@@ -37,6 +37,8 @@ export class Scene extends EventDispatcher{
 		this.geopackages = [];
 		this.spotLights = [];
 		this.spotLightHelpers = [];
+		this.pointLights = [];
+		this.pointLightHelpers = [];
 		
 		this.fpControls = null;
 		this.orbitControls = null;
@@ -256,6 +258,54 @@ export class Scene extends EventDispatcher{
 					'type': 'spotlight_helper_removed',
 					'scene': this,
 					'spotlight_helper': spotLightHelper
+				});
+			}
+		}
+	};
+	
+	addPointLight(pointLight, pointLightHelper){
+		this.pointLights.push(pointLight);
+		this.scene.add(pointLight);
+		
+		this.dispatchEvent({
+			'type': 'pointlight_added',
+			'scene': this,
+			'pointlight': pointLight
+		});
+		
+		if(pointLightHelper) {
+			this.pointLightHelpers.push(pointLightHelper);
+			this.scene.add(pointLightHelper);
+			
+			this.dispatchEvent({
+				'type': 'pointlight_helper_added',
+				'scene': this,
+				'pointlight_helper': pointLightHelper
+			});
+		}
+	};
+
+	removePointLight(pointLight, pointLightHelper){
+		let index = this.pointLights.indexOf(pointLight);
+		if (index > -1) {
+			this.pointLights.splice(index, 1);
+
+			this.dispatchEvent({
+				'type': 'pointlight_removed',
+				'scene': this,
+				'pointlight': pointLight
+			});
+		}
+		
+		if(pointLightHelper) {
+			let indexSph = this.pointLightHelpers.indexOf(pointLightHelper);
+			if (indexSph > -1 && index == indexSph) {
+				this.pointLightHelper.splice(indexSph, 1);
+
+				this.dispatchEvent({
+					'type': 'pointlight_helper_removed',
+					'scene': this,
+					'pointlight_helper': pointLightHelper
 				});
 			}
 		}

@@ -186,6 +186,25 @@ const duplicate = viewer.scene.spotlights.find(spotlight => spotlight.uuid === d
 
 }
 
+function loadPointLights(viewer, data){
+
+const duplicate = viewer.scene.pointlights.find(pointlight => pointlight.uuid === data.uuid);
+	if(duplicate){
+		return;
+	}
+
+	let pointLight = new THREE.PointLight();
+
+	pointLight.uuid = data.uuid;
+	//pointLight.distance = data.distance;
+	//pointLight.angle = data.angle;
+	pointLight.position.set(...data.position);
+	//pointLight.lookAt.set(...data.lookAt);
+	
+	viewer.scene.addPointLight(pointLight);
+
+}
+
 function loadGeopackage(viewer, geopackage){
 
 	const path = geopackage.path;
@@ -387,6 +406,10 @@ export async function loadProject(viewer, data){
 	
 	for(const spotLight of data.spotLights){
 		loadSpotLight(viewer, spotLight);
+	}
+	
+	for(const pointLight of data.pointLights){
+		loadPointLight(viewer, pointLight);
 	}
 
 	loadAnnotations(viewer, data.annotations);

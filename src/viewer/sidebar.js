@@ -319,6 +319,49 @@ export class Sidebar{
 				domElement.addEventListener('mousedown', insertionCallback, true);
 			}
 		));
+		
+		elToolbar.append(this.createToolIcon(
+			Potree.resourcePath + '/icons/pointlight.svg',
+			'[title]tt.add_pointlight',
+			() => {
+				let domElement = this.viewer.renderer.domElement;
+				let insertionCallback = (e) => {
+					if (e.button === THREE.MOUSE.LEFT) {
+						let rect = domElement.getBoundingClientRect();
+						let x = e.clientX - rect.left;
+						let y = e.clientY - rect.top;
+						let mouse = new THREE.Vector2(x, y);
+		
+						let I = Utils.getMousePointCloudIntersection(
+							mouse, 
+							this.viewer.scene.getActiveCamera(), 
+							this.viewer, 
+							this.viewer.scene.pointclouds,
+							{pickClipped: false});
+						
+						let light = new THREE.PointLight();
+						//light.distance = 15;
+						//light.angle = (90 / 180) * Math.PI;
+						light.position.set(I.location.x, I.location.y, I.location.z);
+						//light.lookAt(new THREE.Vector3(1.0 + I.location.x, I.location.y, I.location.z));
+						let sph = null;//new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
+						this.viewer.scene.addSpotLight(light, sph);
+						cancelCallback();
+
+					} else if (e.button === THREE.MOUSE.RIGHT) {
+						cancelCallback();
+					}
+				};
+
+				let cancelCallback = e => {
+					domElement.removeEventListener('mousedown', insertionCallback, true);
+					this.viewer.removeEventListener('cancel_insertions', cancelCallback);
+				};
+				
+				this.viewer.addEventListener('cancel_insertions', cancelCallback);
+				domElement.addEventListener('mousedown', insertionCallback, true);
+			}
+		));
 
 
 		{ // SHOW / HIDE Measurements
@@ -549,6 +592,15 @@ export class Sidebar{
 
 				this.viewer.scene.view.position.copy(object.position);
 				this.viewer.scene.view.lookAt(target);
+			}else if(object instanceof THREE.PointLight){
+				//let distance = (object.distance > 0) ? object.distance / 4 : 5 * 1000;
+				let position = object.position;
+				//let target = new THREE.Vector3().addVectors(
+				//	position, 
+				//	object.getWorldDirection(new THREE.Vector3()).multiplyScalar(-distance));
+
+				this.viewer.scene.view.position.copy(object.position);
+				//this.viewer.scene.view.lookAt(target);
 			}else if(object instanceof THREE.Object3D){
 				let box = new THREE.Box3().setFromObject(object);
 
@@ -740,6 +792,41 @@ export class Sidebar{
 				}
 			});
 		};
+		
+		let onPointLightAdded = (e) => {
+			const pointLight = e.pointlight;
+
+			const pointLightIcon = `${Potree.resourcePath}/icons/pointlight.svg`;
+			const node = createNode(otherID, "pointLight", pointLightIcon, pointLight);
+
+			pointLight.addEventListener("visibility_changed", () => {
+
+				if(pointLight.visible){
+					tree.jstree('check_node', node);
+				}else{
+					tree.jstree('uncheck_node', node);
+				}
+			});
+		};
+		
+		let onPointLightHelperAdded = (e) => {
+			const pointLightHelper = e.pointlight_helper;
+
+			const pointLightHelperIcon = `${Potree.resourcePath}/icons/picture.svg`;
+			const node = createNode(otherID, "pointLightHelper", pointLightHelperIcon, pointLightHelper);
+			
+			pointLightHelper.setViewer(this.viewer);
+			viewer.addEventListener("update", pointLightHelper.update.bind(pointLightHelper));
+
+			pointLightHelper.addEventListener("visibility_changed", () => {
+
+				if(pointLightHelper.visible){
+					tree.jstree('check_node', node);
+				}else{
+					tree.jstree('uncheck_node', node);
+				}
+			});
+		};
 
 		this.viewer.scene.addEventListener("pointcloud_added", onPointCloudAdded);
 		this.viewer.scene.addEventListener("measurement_added", onMeasurementAdded);
@@ -753,6 +840,8 @@ export class Sidebar{
 		this.viewer.scene.annotations.addEventListener("annotation_added", onAnnotationAdded);
 		this.viewer.scene.addEventListener("spotlight_added", onSpotLightAdded);
 		this.viewer.scene.addEventListener("spotlight_helper_added", onSpotLightHelperAdded);
+		this.viewer.scene.addEventListener("pointlight_added", onPointLightAdded);
+		this.viewer.scene.addEventListener("pointlight_helper_added", onPointLightHelperAdded);
 
 		let onMeasurementRemoved = (e) => {
 			let measurementsRoot = $("#jstree_scene").jstree().get_json("measurements");
@@ -790,6 +879,20 @@ export class Sidebar{
 		};
 		
 		let onSpotLightHelperRemoved = (e) => {
+			let otherRoot = $("#jstree_scene").jstree().get_json("other");
+			let jsonNode = otherRoot.children.find(child => child.data.uuid === e.item.uuid);
+			
+			tree.jstree("delete_node", jsonNode.id);
+		};
+		
+		let onPointLightRemoved = (e) => {
+			let otherRoot = $("#jstree_scene").jstree().get_json("other");
+			let jsonNode = otherRoot.children.find(child => child.data.uuid === e.item.uuid);
+			
+			tree.jstree("delete_node", jsonNode.id);
+		};
+		
+		let onPointLightHelperRemoved = (e) => {
 			let otherRoot = $("#jstree_scene").jstree().get_json("other");
 			let jsonNode = otherRoot.children.find(child => child.data.uuid === e.item.uuid);
 			
@@ -853,6 +956,14 @@ export class Sidebar{
 		
 		for(let spotLightHelper of scene.spotLightHelpers){
 			onSpotLightHelperAdded({spotlight_helper: spotLightHelper});
+		}
+		
+		for(let pointLight of scene.pointLights){
+			onPointLightAdded({pointlight: pointLight});
+		}
+		
+		for(let pointLightHelper of scene.pointLightHelpers){
+			onPointLightHelperAdded({pointlight_helper: pointLightHelper});
 		}
 
 		{

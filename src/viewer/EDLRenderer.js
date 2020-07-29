@@ -220,6 +220,24 @@ export class EDLRenderer{
 					lights.push(node);
 				}
 			}
+			else if(node instanceof THREE.PointLight){
+				if(node.visible) {
+					// Represent a point light using 6 spotlights (TODO: 4 for now, up is not handled correctly in PointCloudSM (up))
+					for(var i=0; i<4; i++){
+						let spl = new THREE.SpotLight();
+						spl.position.set(node.position.x, node.position.y, node.position.z);
+						spl.angle = (90 / 180) * Math.PI;
+						spl.distance = node.distance;
+						let tgt = new THREE.Vector3(node.position.x + (i==0 ? 1.0 : (i==1 ? -1.0 : 0.0)),
+													node.position.y + (i==2 ? 1.0 : (i==3 ? -1.0 : 0.0)),
+													node.position.z + (i==4 ? 1.0 : (i==4 ? -1.0 : 0.0)));
+						spl.lookAt(tgt);
+						
+						lights.push(spl);
+					}
+					
+				}
+			}
 		});
 
 		if(viewer.background === "skybox"){
@@ -232,7 +250,6 @@ export class EDLRenderer{
 			viewer.renderer.render(viewer.scene.sceneBG, viewer.scene.cameraBG);
 		} 
 
-		//TODO adapt to multiple lights
 		this.renderShadowMap(visiblePointClouds, camera, lights);
 
 		{ // COLOR & DEPTH PASS
@@ -251,7 +268,6 @@ export class EDLRenderer{
 				material.spacing = pointcloud.pcoGeometry.spacing * Math.max(pointcloud.scale.x, pointcloud.scale.y, pointcloud.scale.z);
 			}
 			
-			// TODO adapt to multiple lights
 			viewer.renderer.setRenderTarget(this.rtEDL);
 			
 			if(lights.length > 0){

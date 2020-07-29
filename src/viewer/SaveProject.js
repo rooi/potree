@@ -129,6 +129,18 @@ function createSpotLightData(spotLight){
 	return data;
 }
 
+function createPointLightData(pointLight){
+	const data = {
+		uuid: pointLight.uuid,
+		//distance: pointLight.distance,
+		//angle: pointLight.angle,
+		position: pointLight.position.toArray(),
+		//lookAt: pointLight.lookAt.toArray(),
+	};
+
+	return data;
+}
+
 function createGeopackageData(geopackage){
 	const data = {
 		path: geopackage.path,
@@ -265,6 +277,7 @@ export function saveProject(viewer) {
 		orientedImages: scene.orientedImages.map(createOrientedImagesData),
 		geopackages: scene.geopackages.map(createGeopackageData),
 		spotLights: scene.spotLights.map(createSpotlightsData),
+		pointLights: scene.pointLights.map(createPointlightsData),
 		// objects: createSceneContentData(viewer),
 	};
 

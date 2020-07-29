@@ -25,6 +25,8 @@ import {AnnotationPanel} from "./AnnotationPanel.js";
 import { CameraAnimationPanel } from "./CameraAnimationPanel.js";
 import {SpotLightPanel} from "./SpotLightPanel.js";
 import {SpotLightHelperPanel} from "./SpotLightHelperPanel.js";
+import {PointLightPanel} from "./PointLightPanel.js";
+import {PointLightHelperPanel} from "./PointLightHelperPanel.js";
 
 export class PropertiesPanel{
 
@@ -67,6 +69,8 @@ export class PropertiesPanel{
 			this.setSpotLight(object);
 		}else if(object instanceof SpotLightHelper){
 			this.setSpotLightHelper(object);
+		}else if(object instanceof THREE.PointLight){
+			this.setPointLight(object);
 		}
 		
 	}
@@ -906,6 +910,11 @@ export class PropertiesPanel{
 	
 	setSpotLightHelper(spotLightHelper){
 		let panel = new SpotLightHelperPanel(this.viewer, spotLightHelper, this);
+		this.container.append(panel.elContent);
+	}
+	
+	setPointLight(pointLight){
+		let panel = new PointLightPanel(this.viewer, pointLight, this);
 		this.container.append(panel.elContent);
 	}
 
