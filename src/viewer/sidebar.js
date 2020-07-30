@@ -321,7 +321,7 @@ export class Sidebar{
 		));
 		
 		elToolbar.append(this.createToolIcon(
-			Potree.resourcePath + '/icons/pointlight.svg',
+			Potree.resourcePath + '/icons/orbit_controls.svg',
 			'[title]tt.add_pointlight',
 			() => {
 				let domElement = this.viewer.renderer.domElement;
@@ -344,8 +344,8 @@ export class Sidebar{
 						//light.angle = (90 / 180) * Math.PI;
 						light.position.set(I.location.x, I.location.y, I.location.z);
 						//light.lookAt(new THREE.Vector3(1.0 + I.location.x, I.location.y, I.location.z));
-						let sph = null;//new Potree.SpotLightHelper(light, new THREE.Color().setHex(0xff0000));
-						this.viewer.scene.addSpotLight(light, sph);
+						let plh = new Potree.PointLightHelper(light);
+						this.viewer.scene.addPointLight(light, plh);
 						cancelCallback();
 
 					} else if (e.button === THREE.MOUSE.RIGHT) {

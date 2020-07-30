@@ -47,7 +47,8 @@
 		"remove_all_clipping_volumes": "Remove all clipping volumes",
 		"compass": "Compass",
 		"camera_animation": "Camera Animation",
-		"add_spotlight": "Add spotlight"
+		"add_spotlight": "Add spotlight",
+		"add_pointlight": "Add pointlight"
 	},
 	"appearance": {
 		"nb_max_pts": "Point budget", 
