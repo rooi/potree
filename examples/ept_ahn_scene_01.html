@@ -89,6 +89,9 @@
 			let material = terrainPointCloud.material;
 			material.size = 0.32;
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+			material.uniforms.uShadowColor.value = [1, 191/255, 0.0];
+			
+			createLights();
 
 			viewer.fitToScreen(0.5);
 		});
@@ -118,7 +121,7 @@
 			
 		});
 		
-		function creatLights() {	
+		function createLights() {	
 			const pointLight = new THREE.PointLight();// 0xffff00, 1000); 
 			pointLight.position.set( tgtPosition.x, tgtPosition.y, tgtPosition.z );
 			pointLight.distance	= 1000;		
