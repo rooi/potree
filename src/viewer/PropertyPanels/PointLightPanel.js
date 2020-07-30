@@ -28,6 +28,10 @@ export class PointLightPanel{
 					<label>z:</label><input id="pointlight_position_z" />
 				</td></tr>
 				
+				<tr><td>
+					<label>distance:</label><input id="pointlight_distance" />
+				</td></tr>
+				
 				<tr>
 					<th colspan="6">target</th>
 					<th></th>
@@ -58,6 +62,11 @@ export class PointLightPanel{
 			this.positionChange(null, null, z);
         }.bind(this));
 		
+		this.elContent.find("#pointlight_distance")[0].addEventListener('change', function () {
+			var d = parseFloat(this.elContent.find("#pointlight_distance")[0].value);
+			this.distanceChange(d);
+        }.bind(this));
+		
 		this.update();
 	}
 	
@@ -69,8 +78,14 @@ export class PointLightPanel{
 		this.pointlight.position.copy(pos);
 	}
 	
+	distanceChange(d) {		
+		this.pointlight.distance = d;
+	}
+	
 	update(){
 		//console.log("updating pointlight panel");
+		
+		let distance = (this.pointlight.distance > 0) ? this.pointlight.distance / 4 : 5 * 1000;
 		
 		let position = this.pointlight.position;
 		
@@ -79,6 +94,8 @@ export class PointLightPanel{
 		this.elContent.find("#pointlight_position_x")[0].value = pos[0];
 		this.elContent.find("#pointlight_position_y")[0].value = pos[1];
 		this.elContent.find("#pointlight_position_z")[0].value = pos[2];
+		
+		this.elContent.find("#pointlight_distance")[0].value = distance;
 				
 	}
 };

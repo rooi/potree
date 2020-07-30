@@ -7,6 +7,7 @@ import {Measure} from "../../utils/Measure.js";
 import {Profile} from "../../utils/Profile.js";
 import {Volume, BoxVolume, SphereVolume} from "../../utils/Volume.js";
 import {SpotLightHelper} from "../../utils/SpotLightHelper.js";
+import {PointLightHelper} from "../../utils/PointLightHelper.js";
 import {CameraAnimation} from "../../modules/CameraAnimation/CameraAnimation.js";
 import {PointSizeType, PointShape, ElevationGradientRepeat} from "../../defines.js";
 import {Gradients} from "../../materials/Gradients.js";
@@ -71,6 +72,8 @@ export class PropertiesPanel{
 			this.setSpotLightHelper(object);
 		}else if(object instanceof THREE.PointLight){
 			this.setPointLight(object);
+		}else if(object instanceof PointLightHelper){
+			this.setPointLightHelper(object);
 		}
 		
 	}
@@ -915,6 +918,11 @@ export class PropertiesPanel{
 	
 	setPointLight(pointLight){
 		let panel = new PointLightPanel(this.viewer, pointLight, this);
+		this.container.append(panel.elContent);
+	}
+	
+	setPointLightHelper(pointLightHelper){
+		let panel = new PointLightHelperPanel(this.viewer, pointLightHelper, this);
 		this.container.append(panel.elContent);
 	}
 

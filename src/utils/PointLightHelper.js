@@ -120,6 +120,13 @@ export class PointLightHelper extends THREE.Object3D{
 	setDistance(d) {
 		this.light.distance = d;
 		
+		let event = {
+			type: 'pointlight_helper_distance_changed',
+			measure:	this,
+			distance: d
+		};
+		this.dispatchEvent(event);
+		
 		this.updateProperties();
 	}
 	

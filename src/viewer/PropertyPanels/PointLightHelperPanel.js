@@ -29,9 +29,14 @@ export class PointLightHelperPanel{
 				</td></tr>
 				
 				<tr>
-					<th colspan="6">target</th>
+					<th colspan="6">distance</th>
 					<th></th>
 				</tr>
+				
+				<tr><td>
+					<label>distance:</label><input id="pointlight_helper_distance" />
+				</td></tr>
+				
 				<tr>
 								
 				<tr>
@@ -57,6 +62,11 @@ export class PointLightHelperPanel{
 			var z = parseFloat(this.elContent.find("#pointlight_helper_position_z")[0].value);
 			this.positionChange(null, null, z);
         }.bind(this));
+		
+		this.elContent.find("#pointlight_helper_distance")[0].addEventListener('change', function () {
+			var d = parseFloat(this.elContent.find("#pointlight_helper_distance")[0].value);
+			this.distanceChange(d);
+        }.bind(this));
 				
 		this.update();
 	}
@@ -69,9 +79,14 @@ export class PointLightHelperPanel{
 		this.pointlighthelper.setPosition(0,pos);
 	}
 	
+	distanceChange(d) {		
+		this.pointlighthelper.setDistance(d);
+	}
+	
 	update(){
 		//console.log("updating spotlight panel");
 		
+		let distance = this.pointlighthelper.getDistance();
 		let position = this.pointlighthelper.position;
 		
 		let pos = position.toArray().map(c => Utils.addCommas(c.toFixed(3)));
@@ -79,6 +94,7 @@ export class PointLightHelperPanel{
 		this.elContent.find("#pointlight_helper_position_x")[0].value = pos[0];
 		this.elContent.find("#pointlight_helper_position_y")[0].value = pos[1];
 		this.elContent.find("#pointlight_helper_position_z")[0].value = pos[2];
-				
+		
+		this.elContent.find("#pointlight_helper_distance")[0].value = distance;				
 	}
 };

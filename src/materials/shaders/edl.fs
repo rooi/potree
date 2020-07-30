@@ -68,7 +68,7 @@ void main(){
 	{
 		if(cEDL.rgb == transparentColor)
 		{
-			_opacity = 0.1;
+			//_opacity = 0.0;
 			//depth = 0.0;
 		}
 	}
