@@ -48,8 +48,8 @@
 		
 		window.pointLightHelper = null;
 		
-		var tgtPosition = new THREE.Vector3(122888.55, 483724.35, 7.14);
-		var tgtPositionLookAt = new THREE.Vector3(122888.75, 483727.06, 7.14);
+		var tgtPosition = new THREE.Vector3(546244.33, 6867670.79, 1.35);
+		var tgtPositionLookAt = new THREE.Vector3(546244.33, 6867680.79, 1.35);
 
 		viewer.setEDLEnabled(true);
 		viewer.setFOV(60);
@@ -64,7 +64,7 @@
 		});
 
         var path = "../PointCloud/AHN3/v1_0/entwine_color/ept.json";
-		var name = "lion";
+		var name = "AHN3";
 
 		var getQueryParam = function(name) {
 			name = name.replace(/[\[\]]/g, "\\$&");
@@ -87,7 +87,7 @@
 			viewer.scene.addPointCloud(terrainPointCloud);
 
 			let material = terrainPointCloud.material;
-			material.size = 1;
+			material.size = 0.32;
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
 
 			viewer.fitToScreen(0.5);
