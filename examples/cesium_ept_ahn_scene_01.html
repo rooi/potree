@@ -99,6 +99,11 @@
 	window.cesiumViewer.scene.sun = new  Cesium.Sun();
 	window.cesiumViewer.scene.globe.enableLighting = true;
 	
+	//window.sunLight = new Cesium.SunLight();
+	//window.cesiumViewer.scene.light = window.sunLight;
+	//var helper = new THREE.DirectionalLightHelper( window.cesiumViewer.scene.light, 5 );
+	//window.cesiumViewer.scene.add( helper );
+	
 	// Note that while it is technically possible to remove the Cesium logo, doing so while using Cesium ion services // is against the terms of service (see https://cesium.com/legal/terms-of-service/ 9).
 	// This example does not use Cesium Ion Services, please only use offline sources.
 	cesiumViewer._cesiumWidget._creditContainer.parentNode.removeChild(cesiumViewer._cesiumWidget._creditContainer);
