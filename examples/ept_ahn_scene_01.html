@@ -95,6 +95,12 @@
 			createLights();
 
 			viewer.fitToScreen(0.5);
+			
+			let pointcloudProjection = e.pointcloud.projection;
+			let mapProjection = proj4.defs("WGS84");
+
+			window.toMap = proj4(pointcloudProjection, mapProjection);
+			window.toScene = proj4(mapProjection, pointcloudProjection);
 		});
 		
 		Potree.loadPointCloud("../pointclouds/Cylinder/cloud.js", "Cylinder", function(e){
